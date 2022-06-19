@@ -1,12 +1,15 @@
 import React from 'react';
-import { Form, MiniDrawer } from '../components';
+import { AlgorithmForm, MiniDrawer } from '../components';
 import { useDispatch } from 'react-redux';
-import { logout } from '../api/user';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
 
-  return <MiniDrawer></MiniDrawer>;
+  return (
+    <MiniDrawer>
+      <AlgorithmForm />
+    </MiniDrawer>
+  );
 };
 
 export default Dashboard;
