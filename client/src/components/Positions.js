@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { range, deepCopy } from '../utils';
 import { useDispatch } from 'react-redux';
 import { addLeg, changeLegOptions } from '../redux/slices/strategySlice';
+import LegsContainer from './LegsContainer';
+import { v4 } from 'uuid';
 import {
   Stack,
   Typography,
@@ -17,13 +19,13 @@ import {
 } from '@mui/material';
 
 const initialPositions = {
-  instruments: 'banknifty',
+  instrument: 'banknifty',
   segment: 'options',
   options: 'CE',
   buysell: 'buy',
   strike: 'ATM',
   quantity: 1,
-  legsOptions: {
+  legOptions: {
     waitAndTrade: false,
     reEntry: false,
     moveSlToCost: false,
@@ -33,20 +35,24 @@ const initialPositions = {
 
 const strikeOptions = [
   ...range(1, 5, 1)
-    .map((item) => `ITM ${item}`)
+    .map((item) => {
+      return { name: `ITM ${item}`, value: `ITM_${item}` };
+    })
     .reverse(),
-  'ATM',
-  ...range(1, 25, 1).map((item) => `OTM ${item}`),
+  { name: 'ATM', value: 'ATM' },
+  ...range(1, 25, 1).map((item) => {
+    return { name: `OTM ${item}`, value: `OTM_${item}` };
+  }),
 ];
 
 export default function Positions() {
   const dispatch = useDispatch();
   const [positions, setPositions] = useState(initialPositions);
 
-  function handleInstruments(event) {
+  function handleinstrument(event) {
     const value = event.target.value;
     setPositions((prev) => {
-      return { ...prev, instruments: value };
+      return { ...prev, instrument: value };
     });
   }
   function handleSegment(event) {
@@ -72,7 +78,7 @@ export default function Positions() {
     });
   }
   function handleQuantity(event) {
-    const value = event.target.value;
+    let value = event.target.value;
     if (value < 0) {
       value = 0;
     }
@@ -85,11 +91,11 @@ export default function Positions() {
     setPositions((prev) => {
       return {
         ...prev,
-        legsOptions: {
-          ...prev.legsOptions,
+        legOptions: {
+          ...prev.legOptions,
           waitAndTrade: value,
           tradeOnlyFirstEntry: value
-            ? prev.legsOptions.tradeOnlyFirstEntry
+            ? prev.legOptions.tradeOnlyFirstEntry
             : false,
         },
       };
@@ -100,7 +106,7 @@ export default function Positions() {
     setPositions((prev) => {
       return {
         ...prev,
-        legsOptions: { ...prev.legsOptions, reEntry: value },
+        legOptions: { ...prev.legOptions, reEntry: value },
       };
     });
   }
@@ -109,7 +115,7 @@ export default function Positions() {
     setPositions((prev) => {
       return {
         ...prev,
-        legsOptions: { ...prev.legsOptions, moveSlToCost: value },
+        legOptions: { ...prev.legOptions, moveSlToCost: value },
       };
     });
   }
@@ -118,28 +124,57 @@ export default function Positions() {
     setPositions((prev) => {
       return {
         ...prev,
-        legsOptions: { ...prev.legsOptions, tradeOnlyFirstEntry: value },
+        legOptions: { ...prev.legOptions, tradeOnlyFirstEntry: value },
       };
     });
   }
   function handleAddLeg() {
-    const leg = deepCopy(positions);
+    let leg = deepCopy(positions);
+    leg = {
+      ...leg,
+      id: v4(),
+      tradeType: 'MIS',
+      target: {
+        type: 'None',
+        value: 0,
+      },
+      stopLoss: {
+        type: 'None',
+        value: 0,
+      },
+      trailingStopLoss: {
+        type: 'None',
+        value: {
+          x: 0,
+          y: 0,
+        },
+      },
+      squareOff: 'square_off_leg',
+      legType: leg.segment === 'options' ? 'leg' : 'futures',
+    };
+    if (leg.legOptions.waitAndTrade) {
+      leg.waitTime = { type: 'immediate', value: 0 };
+    }
+    if (leg.legOptions.reEntry) {
+      leg.reEntrySetting = { type: 're_none', maxEntries: 'no_max_limit' };
+    }
+    delete leg.legOptions;
     if (leg.segment === 'futures') {
       delete leg.options;
       delete leg.strike;
     }
-    delete leg.legsOptions;
     dispatch(addLeg(leg));
   }
 
   useEffect(() => {
-    const legsOptions = deepCopy(positions.legsOptions);
-    dispatch(changeLegOptions(legsOptions));
+    const legOptions = deepCopy(positions.legOptions);
+    dispatch(changeLegOptions(legOptions));
+    // eslint-disable-next-line
   }, [
-    positions.legsOptions.waitAndTrade,
-    positions.legsOptions.moveSlToCost,
-    positions.legsOptions.tradeOnlyFirstEntry,
-    positions.legsOptions.reEntry,
+    positions.legOptions.waitAndTrade,
+    positions.legOptions.moveSlToCost,
+    positions.legOptions.tradeOnlyFirstEntry,
+    positions.legOptions.reEntry,
   ]);
 
   return (
@@ -149,15 +184,15 @@ export default function Positions() {
       </Typography>
       <Stack direction='row' spacing={4}>
         {/* ///////////////////// */}
-        {/* //// INSTRUMENTS //// */}
+        {/* //// instrument //// */}
         {/* ///////////////////// */}
         <Stack spacing={1}>
-          <Typography>Instruments</Typography>
+          <Typography>instrument</Typography>
           <FormControl size='small'>
             <Select
-              name='instruments'
-              value={positions.instruments}
-              onChange={handleInstruments}
+              name='instrument'
+              value={positions.instrument}
+              onChange={handleinstrument}
             >
               <MenuItem value='banknifty'>Banknifty</MenuItem>
               <MenuItem value='nifty'>Nifty</MenuItem>
@@ -228,8 +263,8 @@ export default function Positions() {
               >
                 {strikeOptions.map((item, index) => {
                   return (
-                    <MenuItem key={index} value={item}>
-                      {item}
+                    <MenuItem key={index} value={item.value}>
+                      {item.name}
                     </MenuItem>
                   );
                 })}
@@ -261,7 +296,7 @@ export default function Positions() {
           <FormControlLabel
             control={
               <Checkbox
-                checked={positions.legsOptions.waitAndTrade}
+                checked={positions.legOptions.waitAndTrade}
                 onChange={handleWaitAndTrade}
               />
             }
@@ -271,12 +306,12 @@ export default function Positions() {
         {/* //////////////////////////////// */}
         {/* //// TRADE ONLY FIRST ENTRY //// */}
         {/* //////////////////////////////// */}
-        {positions.legsOptions.waitAndTrade && (
+        {positions.legOptions.waitAndTrade && (
           <Stack spacing={1} justifyContent='flex-end'>
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={positions.legsOptions.tradeOnlyFirstEntry}
+                  checked={positions.legOptions.tradeOnlyFirstEntry}
                   onChange={handleTradeOnlyFirstEntry}
                 />
               }
@@ -292,7 +327,7 @@ export default function Positions() {
           <FormControlLabel
             control={
               <Checkbox
-                checked={positions.legsOptions.reEntry}
+                checked={positions.legOptions.reEntry}
                 onChange={handleReEntry}
               />
             }
@@ -308,12 +343,13 @@ export default function Positions() {
           </Button>
         </Stack>
       </Stack>
+      <LegsContainer />
       <Stack direction='row' spacing={4}>
         <Stack spacing={1} justifyContent='flex-end'>
           <FormControlLabel
             control={
               <Checkbox
-                checked={positions.legsOptions.moveSlToCost}
+                checked={positions.legOptions.moveSlToCost}
                 onChange={handleMoveSlToCost}
               />
             }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import range from '../utils/range';
 import {
   Stack,
@@ -9,96 +9,27 @@ import {
   Select,
   MenuItem,
   FormHelperText,
+  Slider,
 } from '@mui/material';
 
-const initialStrategy = {
-  underlying: 'spot',
-  tradeType: 'intraday',
-  weekDays: ['monday', 'wednessday', 'friday'],
-  duration: 'STBT/BTST',
-  startTime: {
-    hour: 9,
-    minute: 15,
-    second: 0,
-  },
-  endTime: {
-    hour: 9,
-    minute: 15,
-    second: 0,
-  },
-  nextDayEndTime: {
-    hour: 9,
-    minute: 15,
-    second: 0,
-  },
-  checkConditionNextDayAfter: {
-    hour: 9,
-    minute: 15,
-    second: 0,
-  },
-};
+const sliderMarks = [
+  { value: 0, label: 0 },
+  { value: 4, label: 4 },
+];
 
-export default function Strategy() {
-  const [strategy, setStrategy] = useState(initialStrategy);
-
-  function handleUnderlying(event, value) {
-    setStrategy((prev) => {
-      return { ...prev, underlying: value };
-    });
-  }
-  function handleTradeType(event, value) {
-    setStrategy((prev) => {
-      return { ...prev, tradeType: value };
-    });
-  }
-  function handleWeekDays(event, value) {
-    setStrategy((prev) => {
-      return { ...prev, weekDays: value };
-    });
-  }
-  function handleDuration(event) {
-    const value = event.target.value;
-    setStrategy((prev) => {
-      return { ...prev, duration: value };
-    });
-  }
-  function handleStartTime(event) {
-    const name = event.target.name;
-    const value = event.target.value;
-    setStrategy((prev) => {
-      return { ...prev, startTime: { ...prev.startTime, [name]: value } };
-    });
-  }
-  function handleEndTime(event) {
-    const name = event.target.name;
-    const value = event.target.value;
-    setStrategy((prev) => {
-      return { ...prev, endTime: { ...prev.endTime, [name]: value } };
-    });
-  }
-  function handleNextDayEndTime(event) {
-    const name = event.target.name;
-    const value = event.target.value;
-    setStrategy((prev) => {
-      return {
-        ...prev,
-        nextDayEndTime: { ...prev.nextDayEndTime, [name]: value },
-      };
-    });
-  }
-  function handleCheckConditionNextDayAfter(event) {
-    const name = event.target.name;
-    const value = event.target.value;
-    setStrategy((prev) => {
-      return {
-        ...prev,
-        checkConditionNextDayAfter: {
-          ...prev.checkConditionNextDayAfter,
-          [name]: value,
-        },
-      };
-    });
-  }
+export default function Strategy(props) {
+  const {
+    strategy,
+    handleUnderlying,
+    handleTradeType,
+    handleWeekDays,
+    handleDuration,
+    handleStartTime,
+    handleEndTime,
+    handleNextDayEndTime,
+    handleCheckConditionNextDayAfter,
+    handleDaysBeforeExpiry,
+  } = props;
 
   return (
     <Stack spacing={4}>
@@ -147,8 +78,8 @@ export default function Strategy() {
                 value={strategy.duration}
                 onChange={handleDuration}
               >
-                <MenuItem value='STBT/BTST'>STBT/BTST</MenuItem>
-                <MenuItem value='(N) days before expiry'>
+                <MenuItem value='STBT_BTST'>STBT/BTST</MenuItem>
+                <MenuItem value='N_days_before_expiry'>
                   (N) days before expiry
                 </MenuItem>
               </Select>
@@ -231,10 +162,31 @@ export default function Strategy() {
             </FormControl>
           </Stack>
         </Stack>
+        {/* //////////////////////////// */}
+        {/* //// DAYS BEFORE EXPIRY //// */}
+        {/* //////////////////////////// */}
+        {strategy.tradeType === 'positional' &&
+          strategy.duration === '(N) days before expiry' && (
+            <Stack spacing={1}>
+              <Typography>End day</Typography>
+              <Slider
+                defaultValue={4}
+                value={strategy.daysBeforeExpiry}
+                min={0}
+                max={4}
+                step={1}
+                marks={sliderMarks}
+                valueLabelDisplay='auto'
+                onChange={handleDaysBeforeExpiry}
+              />
+            </Stack>
+          )}
         {/* ////////////////// */}
         {/* //// END TIME //// */}
         {/* ////////////////// */}
-        {strategy.tradeType === 'intraday' && (
+        {(strategy.tradeType === 'intraday' ||
+          (strategy.tradeType === 'positional' &&
+            strategy.duration === '(N) days before expiry')) && (
           <Stack spacing={1}>
             <Typography>End time</Typography>
             <Stack direction='row' spacing={1}>
@@ -292,61 +244,62 @@ export default function Strategy() {
         {/* /////////////////////////// */}
         {/* //// NEXT DAY END TIME //// */}
         {/* /////////////////////////// */}
-        {strategy.tradeType === 'positional' && (
-          <Stack spacing={1}>
-            <Typography>Next day end time</Typography>
-            <Stack direction='row' spacing={1}>
-              <FormControl size='small'>
-                <Select
-                  name='hour'
-                  value={strategy.nextDayEndTime.hour}
-                  onChange={handleNextDayEndTime}
-                >
-                  {range(9, 15, 1).map((item, index) => {
-                    return (
-                      <MenuItem key={index} value={item}>
-                        {item}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-                <FormHelperText>HH</FormHelperText>
-              </FormControl>
-              <FormControl size='small'>
-                <Select
-                  name='minute'
-                  value={strategy.nextDayEndTime.minute}
-                  onChange={handleNextDayEndTime}
-                >
-                  {range(0, 59, 1).map((item, index) => {
-                    return (
-                      <MenuItem key={index} value={item}>
-                        {item}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-                <FormHelperText>MM</FormHelperText>
-              </FormControl>
-              <FormControl size='small'>
-                <Select
-                  name='second'
-                  value={strategy.nextDayEndTime.second}
-                  onChange={handleNextDayEndTime}
-                >
-                  {range(0, 59, 1).map((item, index) => {
-                    return (
-                      <MenuItem key={index} value={item}>
-                        {item}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-                <FormHelperText>SS</FormHelperText>
-              </FormControl>
+        {strategy.tradeType === 'positional' &&
+          strategy.duration === 'STBT/BTST' && (
+            <Stack spacing={1}>
+              <Typography>Next day end time</Typography>
+              <Stack direction='row' spacing={1}>
+                <FormControl size='small'>
+                  <Select
+                    name='hour'
+                    value={strategy.nextDayEndTime.hour}
+                    onChange={handleNextDayEndTime}
+                  >
+                    {range(9, 15, 1).map((item, index) => {
+                      return (
+                        <MenuItem key={index} value={item}>
+                          {item}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                  <FormHelperText>HH</FormHelperText>
+                </FormControl>
+                <FormControl size='small'>
+                  <Select
+                    name='minute'
+                    value={strategy.nextDayEndTime.minute}
+                    onChange={handleNextDayEndTime}
+                  >
+                    {range(0, 59, 1).map((item, index) => {
+                      return (
+                        <MenuItem key={index} value={item}>
+                          {item}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                  <FormHelperText>MM</FormHelperText>
+                </FormControl>
+                <FormControl size='small'>
+                  <Select
+                    name='second'
+                    value={strategy.nextDayEndTime.second}
+                    onChange={handleNextDayEndTime}
+                  >
+                    {range(0, 59, 1).map((item, index) => {
+                      return (
+                        <MenuItem key={index} value={item}>
+                          {item}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                  <FormHelperText>SS</FormHelperText>
+                </FormControl>
+              </Stack>
             </Stack>
-          </Stack>
-        )}
+          )}
         {/* ///////////////////////////////////////////// */}
         {/* //// CHECK CONDITION NEXT DAY AFTER TIME //// */}
         {/* ///////////////////////////////////////////// */}

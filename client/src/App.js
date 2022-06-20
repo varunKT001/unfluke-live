@@ -9,6 +9,7 @@ function App() {
 
   useEffect(() => {
     dispatch(auth());
+    // eslint-disable-next-line
   }, []);
 
   return (
