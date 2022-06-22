@@ -9,6 +9,7 @@ import MTM from './MTM';
 import MTMTarget from './MTMTarget';
 import MTMStopLoss from './MTMStopLoss';
 import MTMTrailing from './MTMTrailing';
+import AdvancedSettings from './AdvancedSettings';
 
 export {
   MiniDrawer,
@@ -22,4 +23,5 @@ export {
   MTMTarget,
   MTMStopLoss,
   MTMTrailing,
+  AdvancedSettings,
 };

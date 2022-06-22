@@ -25,6 +25,14 @@ const initialState = {
     value: 'None',
     type: 'percentage',
   },
+  advancedSettings: {
+    entry: {
+      type: 'market_M',
+    },
+    exit: {
+      type: 'market_M',
+    },
+  },
 };
 
 const strategySlice = createSlice({
@@ -105,6 +113,13 @@ const strategySlice = createSlice({
         action.payload.value
       );
     },
+    updateAdvancedSettings: (state, action) => {
+      set(
+        state.advancedSettings,
+        action.payload.name.split('.'),
+        action.payload.value
+      );
+    },
     deleteStateProp: (state, action) => {
       unset(state, action.payload.split('.'));
     },
@@ -122,5 +137,6 @@ export const {
   updateMTMStopLoss,
   updateMTMTrailing,
   deleteStateProp,
+  updateAdvancedSettings,
 } = strategySlice.actions;
 export default strategySlice.reducer;

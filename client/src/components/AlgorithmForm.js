@@ -3,6 +3,7 @@ import { Stack, TextField, Divider, Button } from '@mui/material';
 import Positions from './Positions';
 import MTM from './MTM';
 import Strategy from './Strategy';
+import AdvancedSettings from './AdvancedSettings';
 import { deepCopy } from '../utils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -163,6 +164,7 @@ export default function AlgorithmForm() {
       />
       <Positions />
       <MTM />
+      <AdvancedSettings />
       <Button variant='contained' sx={{ width: 'fit-content' }}>
         Save settings
       </Button>
