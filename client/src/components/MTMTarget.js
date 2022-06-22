@@ -8,9 +8,8 @@ import {
   Stack,
   TextField,
   Typography,
-  FormControl,
-  Select,
-  MenuItem,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 
 export default function MTMTarget() {
@@ -24,15 +23,23 @@ export default function MTMTarget() {
       const payload = { name: 'value', value: 0 };
       dispatch(updateMTMTarget(payload));
     }
+    if (name === 'value' && value < 0) {
+      value = 0;
+    }
     const payload = {
       name,
       value,
     };
     dispatch(updateMTMTarget(payload));
   }
+  function handleMTMType(event, value) {
+    const name = 'type';
+    const payload = { name, value };
+    dispatch(updateMTMTarget(payload));
+  }
 
   return (
-    <Stack spacing={2} width='50%'>
+    <Stack spacing={2}>
       <Typography variant='button' color='grey.600'>
         mtm target
       </Typography>
@@ -40,23 +47,25 @@ export default function MTMTarget() {
         {/* ////////////////// */}
         {/* //// MTM TYPE //// */}
         {/* ////////////////// */}
-        <Stack spacing={1} width='65%'>
-          <Typography>Type</Typography>
-          <FormControl size='small'>
-            <Select name='type' value={MTMTarget.type} onChange={handleChange}>
-              <MenuItem value='None'>None</MenuItem>
-              <MenuItem value='mtm_in_percentage'>MTM in percentage</MenuItem>
-              <MenuItem value='mtm_in_total_amount'>
-                MTM in total amount
-              </MenuItem>
-            </Select>
-          </FormControl>
+        <Stack spacing={1}>
+          <Typography fontSize='14px'>Type</Typography>
+          <ToggleButtonGroup
+            size='small'
+            color='primary'
+            exclusive
+            value={MTMTarget.type}
+            onChange={handleMTMType}
+          >
+            <ToggleButton value='None'>None</ToggleButton>
+            <ToggleButton value='mtm_in_percentage'>%</ToggleButton>
+            <ToggleButton value='mtm_in_total_amount'>₹</ToggleButton>
+          </ToggleButtonGroup>
         </Stack>
         {/* /////////////////// */}
         {/* //// MTM VALUE //// */}
         {/* /////////////////// */}
-        <Stack spacing={1}>
-          <Typography>Value</Typography>
+        <Stack spacing={1} width='150px'>
+          <Typography fontSize='14px'>Value</Typography>
           <TextField
             size='small'
             type='number'
