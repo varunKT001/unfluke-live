@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import Leg from './Leg';
 
 export default function LegsContainer() {
-  const { legs } = useSelector((store) => store.strategy);
+  const { legs } = useSelector((store) => store.strategy.positions);
   return (
     <Stack
       boxShadow={3}

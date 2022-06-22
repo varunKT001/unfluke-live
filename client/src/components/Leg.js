@@ -1,7 +1,12 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateLeg, deleteLeg } from '../redux/slices/strategySlice';
-import { range } from '../utils';
+import {
+  range,
+  toCamelCase,
+  capitalizeFirstLetter,
+  getUserInput,
+} from '../utils';
 import {
   Stack,
   Button,
@@ -35,11 +40,24 @@ const maxEntriesOptions = [
 
 export default function Leg(props) {
   const dispatch = useDispatch();
-  const { legOptions } = useSelector((store) => store.strategy);
+  const { legOptions } = useSelector((store) => store.strategy.positions);
 
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
+    if (name === 'legType.type' && value !== 'leg') {
+      const payload = {
+        id: props.id,
+        name: 'legType.value',
+        value: getUserInput(
+          capitalizeFirstLetter(value.split('_').join(' ')),
+          /^\d+$/,
+          'Please input a number',
+          0
+        ),
+      };
+      dispatch(updateLeg(payload));
+    }
     if (name === 'quantity') {
       if (value < 0) {
         value = 0;
@@ -49,7 +67,8 @@ export default function Leg(props) {
       name.split('.')[0] === 'target' ||
       name.split('.')[0] === 'stopLoss' ||
       name.split('.')[0] === 'trailingStopLoss' ||
-      name.split('.')[0] === 'waitTime'
+      name.split('.')[0] === 'waitTime' ||
+      name.split('.')[0] === 'legType'
     ) {
       if (value < 0) {
         value = 0;
@@ -162,21 +181,21 @@ export default function Leg(props) {
         {props.segment === 'options' && (
           <FormControl size='small'>
             <Select
-              name='legType'
-              value={props.legType}
+              name='legType.type'
+              value={props.legType.type}
               onChange={handleChange}
             >
               <MenuItem value='leg'>Leg</MenuItem>
-              <MenuItem value='premium close to'>Premium close to</MenuItem>
-              <MenuItem value='premium > than'>Premium &gt; than</MenuItem>
-              <MenuItem value='premium < than'>Premium &lt; than</MenuItem>
+              <MenuItem value='premium_close_to'>Premium close to</MenuItem>
+              <MenuItem value='premium_higher_than'>Premium &gt; than</MenuItem>
+              <MenuItem value='premium_lower_than'>Premium &lt; than</MenuItem>
             </Select>
           </FormControl>
         )}
         {/* //////////////// */}
         {/* //// STRIKE //// */}
         {/* //////////////// */}
-        {props.segment === 'options' && (
+        {props.segment === 'options' && props.legType.type === 'leg' && (
           <FormControl size='small'>
             <Select name='strike' value={props.strike} onChange={handleChange}>
               {strikeOptions.map((item, index) => {
@@ -188,6 +207,19 @@ export default function Leg(props) {
               })}
             </Select>
           </FormControl>
+        )}
+        {/* /////////////////// */}
+        {/* //// LEG VALUE //// */}
+        {/* /////////////////// */}
+        {props.segment === 'options' && props.legType.type !== 'leg' && (
+          <TextField
+            size='small'
+            type='number'
+            name='legType.value'
+            value={props.legType.value}
+            onChange={handleChange}
+            sx={{ width: '65px' }}
+          />
         )}
         {/* ///////////////// */}
         {/* //// OPTIONS //// */}

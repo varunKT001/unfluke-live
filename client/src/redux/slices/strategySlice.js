@@ -1,14 +1,29 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { setDeepObjProp as set } from '../../utils';
+import { setDeepObjProp as set, deleteDeepObjProp as unset } from '../../utils';
 
 const initialState = {
   name: 'strategy_name',
-  legs: [],
-  legOptions: {
-    moveSlToCost: true,
-    reEntry: false,
-    tradeOnlyFirstEntry: false,
-    waitAndTrade: true,
+  strategySettings: {},
+  positions: {
+    legs: [],
+    legOptions: {
+      moveSlToCost: true,
+      reEntry: false,
+      tradeOnlyFirstEntry: false,
+      waitAndTrade: true,
+    },
+  },
+  MTMTarget: {
+    type: 'None',
+    value: 0,
+  },
+  MTMStopLoss: {
+    fixedStopLoss: 'None',
+    value: 0,
+    profitLockTrailingStopLoss: {
+      value: 'None',
+      type: 'percentage',
+    },
   },
 };
 
@@ -17,12 +32,15 @@ const strategySlice = createSlice({
   initialState,
   reducers: {
     addLeg: (state, action) => {
-      state.legs.push(action.payload);
+      state.positions.legs.push(action.payload);
     },
     changeLegOptions: (state, action) => {
-      state.legOptions = { ...state.legOptions, ...action.payload };
-      if (state.legOptions.waitAndTrade) {
-        state.legs = state.legs.map((leg) => {
+      state.positions.legOptions = {
+        ...state.positions.legOptions,
+        ...action.payload,
+      };
+      if (state.positions.legOptions.waitAndTrade) {
+        state.positions.legs = state.positions.legs.map((leg) => {
           return {
             ...leg,
             waitTime: { type: 'immediate', value: 0 },
@@ -30,20 +48,20 @@ const strategySlice = createSlice({
           };
         });
       } else {
-        state.legs = state.legs.map((leg) => {
+        state.positions.legs = state.positions.legs.map((leg) => {
           delete leg.waitTime;
           return leg;
         });
       }
-      if (state.legOptions.reEntry) {
-        state.legs = state.legs.map((leg) => {
+      if (state.positions.legOptions.reEntry) {
+        state.positions.legs = state.positions.legs.map((leg) => {
           return {
             ...leg,
             reEntrySetting: { type: 're_none', maxEntries: 'no_max_limit' },
           };
         });
       } else {
-        state.legs = state.legs.map((leg) => {
+        state.positions.legs = state.positions.legs.map((leg) => {
           delete leg.reEntrySetting;
           return leg;
         });
@@ -56,11 +74,32 @@ const strategySlice = createSlice({
       state.strategySettings = action.payload;
     },
     updateLeg: (state, action) => {
-      let leg = state.legs.find((item) => item.id === action.payload.id);
+      let leg = state.positions.legs.find(
+        (item) => item.id === action.payload.id
+      );
       set(leg, action.payload.name.split('.'), action.payload.value);
     },
     deleteLeg: (state, action) => {
-      state.legs = state.legs.filter((leg) => leg.id !== action.payload);
+      state.positions.legs = state.positions.legs.filter(
+        (leg) => leg.id !== action.payload
+      );
+    },
+    updateMTMTarget: (state, action) => {
+      set(
+        state.MTMTarget,
+        action.payload.name.split('.'),
+        action.payload.value
+      );
+    },
+    updateMTMStopLoss: (state, action) => {
+      set(
+        state.MTMStopLoss,
+        action.payload.name.split('.'),
+        action.payload.value
+      );
+    },
+    deleteStateProp: (state, action) => {
+      unset(state, action.payload.split('.'));
     },
   },
 });
@@ -72,5 +111,8 @@ export const {
   saveStrategySettings,
   updateLeg,
   deleteLeg,
+  updateMTMTarget,
+  updateMTMStopLoss,
+  deleteStateProp,
 } = strategySlice.actions;
 export default strategySlice.reducer;

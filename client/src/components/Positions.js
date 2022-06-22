@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { range, deepCopy } from '../utils';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addLeg, changeLegOptions } from '../redux/slices/strategySlice';
 import LegsContainer from './LegsContainer';
 import { v4 } from 'uuid';
@@ -47,6 +47,7 @@ const strikeOptions = [
 
 export default function Positions() {
   const dispatch = useDispatch();
+  const { legs } = useSelector((store) => store.strategy.positions);
   const [positions, setPositions] = useState(initialPositions);
 
   function handleinstrument(event) {
@@ -150,7 +151,10 @@ export default function Positions() {
         },
       },
       squareOff: 'square_off_leg',
-      legType: leg.segment === 'options' ? 'leg' : 'futures',
+      legType: {
+        type: leg.segment === 'options' ? 'leg' : 'futures',
+        value: null,
+      },
     };
     if (leg.legOptions.waitAndTrade) {
       leg.waitTime = { type: 'immediate', value: 0 };
@@ -183,11 +187,11 @@ export default function Positions() {
         positions
       </Typography>
       <Stack direction='row' spacing={4}>
-        {/* ///////////////////// */}
+        {/* //////////////////// */}
         {/* //// instrument //// */}
-        {/* ///////////////////// */}
+        {/* //////////////////// */}
         <Stack spacing={1}>
-          <Typography>instrument</Typography>
+          <Typography>Instrument</Typography>
           <FormControl size='small'>
             <Select
               name='instrument'
@@ -343,7 +347,7 @@ export default function Positions() {
           </Button>
         </Stack>
       </Stack>
-      <LegsContainer />
+      {legs.length > 0 && <LegsContainer />}
       <Stack direction='row' spacing={4}>
         <Stack spacing={1} justifyContent='flex-end'>
           <FormControlLabel

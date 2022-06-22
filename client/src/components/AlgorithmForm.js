@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Stack, TextField, Divider, Button } from '@mui/material';
 import Positions from './Positions';
+import MTM from './MTM';
 import Strategy from './Strategy';
 import { deepCopy } from '../utils';
 import { useDispatch, useSelector } from 'react-redux';
@@ -134,6 +135,10 @@ export default function AlgorithmForm() {
     dispatch(saveStrategyName(strategyName));
   }
 
+  useEffect(() => {
+    handleSaveSettings();
+  }, [strategyName, strategy]);
+
   return (
     <Stack spacing={4} divider={<Divider orientation='horizontal' flexItem />}>
       <TextField
@@ -157,11 +162,8 @@ export default function AlgorithmForm() {
         }}
       />
       <Positions />
-      <Button
-        variant='contained'
-        sx={{ width: 'fit-content' }}
-        onClick={handleSaveSettings}
-      >
+      <MTM />
+      <Button variant='contained' sx={{ width: 'fit-content' }}>
         Save settings
       </Button>
     </Stack>

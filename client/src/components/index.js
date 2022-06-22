@@ -5,6 +5,9 @@ import Strategy from './Strategy';
 import AlgorithmForm from './AlgorithmForm';
 import LegsContainer from './LegsContainer';
 import Leg from './Leg';
+import MTM from './MTM';
+import MTMTarget from './MTMTarget';
+import MTMStopLoss from './MTMStopLoss';
 
 export {
   MiniDrawer,
@@ -14,4 +17,7 @@ export {
   Strategy,
   LegsContainer,
   Leg,
+  MTM,
+  MTMTarget,
+  MTMStopLoss,
 };
