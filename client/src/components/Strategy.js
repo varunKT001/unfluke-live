@@ -166,7 +166,7 @@ export default function Strategy(props) {
         {/* //// DAYS BEFORE EXPIRY //// */}
         {/* //////////////////////////// */}
         {strategy.tradeType === 'positional' &&
-          strategy.duration === '(N) days before expiry' && (
+          strategy.duration === 'N_days_before_expiry' && (
             <Stack spacing={1}>
               <Typography>End day</Typography>
               <Slider
@@ -186,7 +186,7 @@ export default function Strategy(props) {
         {/* ////////////////// */}
         {(strategy.tradeType === 'intraday' ||
           (strategy.tradeType === 'positional' &&
-            strategy.duration === '(N) days before expiry')) && (
+            strategy.duration === 'N_days_before_expiry')) && (
           <Stack spacing={1}>
             <Typography>End time</Typography>
             <Stack direction='row' spacing={1}>
@@ -245,7 +245,7 @@ export default function Strategy(props) {
         {/* //// NEXT DAY END TIME //// */}
         {/* /////////////////////////// */}
         {strategy.tradeType === 'positional' &&
-          strategy.duration === 'STBT/BTST' && (
+          strategy.duration === 'STBT_BTST' && (
             <Stack spacing={1}>
               <Typography>Next day end time</Typography>
               <Stack direction='row' spacing={1}>

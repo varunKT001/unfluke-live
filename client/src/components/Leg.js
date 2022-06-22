@@ -1,12 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateLeg, deleteLeg } from '../redux/slices/strategySlice';
-import {
-  range,
-  toCamelCase,
-  capitalizeFirstLetter,
-  getUserInput,
-} from '../utils';
+import { range, capitalizeFirstLetter, getUserInput } from '../utils';
 import {
   Stack,
   Button,
@@ -16,6 +11,7 @@ import {
   TextField,
   Typography,
   IconButton,
+  InputAdornment,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -150,7 +146,7 @@ export default function Leg(props) {
         {/* ////////////////// */}
         <Button
           variant='outlined'
-          color='success'
+          color={props.buysell === 'buy' ? 'success' : 'error'}
           size='small'
           onClick={handleBuySell}
           sx={{
@@ -224,18 +220,32 @@ export default function Leg(props) {
         {/* ///////////////// */}
         {/* //// OPTIONS //// */}
         {/* ///////////////// */}
-        <Button
-          variant='outlined'
-          color='info'
-          size='small'
-          onClick={handleOptions}
-          sx={{
-            maxWidth: '100px',
-            minWidth: '30px',
-          }}
-        >
-          {props.options}
-        </Button>
+        {props.segment === 'options' ? (
+          <Button
+            variant='outlined'
+            color='info'
+            size='small'
+            onClick={handleOptions}
+            sx={{
+              maxWidth: '100px',
+              minWidth: '30px',
+            }}
+          >
+            {props.options}
+          </Button>
+        ) : (
+          <Button
+            variant='outlined'
+            color='info'
+            size='small'
+            sx={{
+              maxWidth: '100px',
+              minWidth: '30px',
+            }}
+          >
+            FT
+          </Button>
+        )}
         {/* ////////////////// */}
         {/* //// QUANTITY //// */}
         {/* ////////////////// */}
@@ -246,7 +256,10 @@ export default function Leg(props) {
             name='quantity'
             value={props.quantity}
             onChange={handleChange}
-            sx={{ width: '65px' }}
+            sx={{ width: '85px' }}
+            InputProps={{
+              endAdornment: <InputAdornment position='end'>x</InputAdornment>,
+            }}
           />
           <Typography fontSize={18} color='grey.600'>
             ({props.quantity * (props.instrument === 'banknifty' ? 25 : 50)})
@@ -265,7 +278,7 @@ export default function Leg(props) {
                   name='waitTime.type'
                   value={props.waitTime.type}
                   onChange={handleChange}
-                  sx={{ color: 'green' }}
+                  sx={{ color: 'blue', fontWeight: '500' }}
                 >
                   <MenuItem value='pts_up'>Pts &uarr;</MenuItem>
                   <MenuItem value='pts_down'>Pts &darr;</MenuItem>
@@ -280,7 +293,7 @@ export default function Leg(props) {
                 name='waitTime.value'
                 value={props.waitTime.value}
                 onChange={handleChange}
-                sx={{ input: { color: 'green' } }}
+                sx={{ input: { color: 'blue', fontWeight: '500' } }}
                 disabled={props.waitTime.type === 'immediate'}
               />
             </Stack>
@@ -294,7 +307,7 @@ export default function Leg(props) {
                 name='target.type'
                 value={props.target.type}
                 onChange={handleChange}
-                sx={{ color: 'green' }}
+                sx={{ color: 'green', fontWeight: '500' }}
               >
                 <MenuItem value='TP: %'>TP: %</MenuItem>
                 <MenuItem value='TP: pt'>TP: pt</MenuItem>
@@ -307,7 +320,7 @@ export default function Leg(props) {
               name='target.value'
               value={props.target.value}
               onChange={handleChange}
-              sx={{ input: { color: 'green' } }}
+              sx={{ input: { color: 'green', fontWeight: '500' } }}
               disabled={props.target.type === 'None'}
             />
           </Stack>
@@ -320,7 +333,7 @@ export default function Leg(props) {
                 name='stopLoss.type'
                 value={props.stopLoss.type}
                 onChange={handleChange}
-                sx={{ color: 'red' }}
+                sx={{ color: 'red', fontWeight: '500' }}
               >
                 <MenuItem value='SL: %'>SL: %</MenuItem>
                 <MenuItem value='SL: pt'>SL: pt</MenuItem>
@@ -333,7 +346,7 @@ export default function Leg(props) {
               name='stopLoss.value'
               value={props.stopLoss.value}
               onChange={handleChange}
-              sx={{ input: { color: 'red' } }}
+              sx={{ input: { color: 'red', fontWeight: '500' } }}
               disabled={props.stopLoss.type === 'None'}
             />
           </Stack>
@@ -346,7 +359,7 @@ export default function Leg(props) {
                 name='trailingStopLoss.type'
                 value={props.trailingStopLoss.type}
                 onChange={handleChange}
-                sx={{ color: 'orange' }}
+                sx={{ color: 'orange', fontWeight: '500' }}
               >
                 <MenuItem value='TS: %'>TS: %</MenuItem>
                 <MenuItem value='TS: pt'>TS: pt</MenuItem>
@@ -360,7 +373,7 @@ export default function Leg(props) {
                 name='trailingStopLoss.value.x'
                 value={props.trailingStopLoss.value.x}
                 onChange={handleChange}
-                sx={{ input: { color: 'orange' } }}
+                sx={{ input: { color: 'orange', fontWeight: '500' } }}
                 disabled={props.stopLoss.type === 'None' ? true : false}
               />
               <TextField
@@ -369,7 +382,7 @@ export default function Leg(props) {
                 name='trailingStopLoss.value.y'
                 value={props.trailingStopLoss.value.y}
                 onChange={handleChange}
-                sx={{ input: { color: 'orange' } }}
+                sx={{ input: { color: 'orange', fontWeight: '500' } }}
                 disabled={props.stopLoss.type === 'None' ? true : false}
               />
             </Stack>
@@ -387,7 +400,7 @@ export default function Leg(props) {
                   name='reEntrySetting.type'
                   value={props.reEntrySetting.type}
                   onChange={handleChange}
-                  sx={{ color: 'purple' }}
+                  sx={{ color: 'purple', fontWeight: '500' }}
                 >
                   <MenuItem value='re_cost'>
                     Re-enter at cost (RE COST)
@@ -413,7 +426,7 @@ export default function Leg(props) {
                   name='reEntrySetting.maxEntries'
                   value={props.reEntrySetting.maxEntries}
                   onChange={handleChange}
-                  sx={{ color: 'purple' }}
+                  sx={{ color: 'purple', fontWeight: '500' }}
                 >
                   {maxEntriesOptions.map((item, index) => {
                     return (

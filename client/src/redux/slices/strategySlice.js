@@ -20,10 +20,10 @@ const initialState = {
   MTMStopLoss: {
     fixedStopLoss: 'None',
     value: 0,
-    profitLockTrailingStopLoss: {
-      value: 'None',
-      type: 'percentage',
-    },
+  },
+  MTMTrailing: {
+    value: 'None',
+    type: 'percentage',
   },
 };
 
@@ -98,6 +98,13 @@ const strategySlice = createSlice({
         action.payload.value
       );
     },
+    updateMTMTrailing: (state, action) => {
+      set(
+        state.MTMTrailing,
+        action.payload.name.split('.'),
+        action.payload.value
+      );
+    },
     deleteStateProp: (state, action) => {
       unset(state, action.payload.split('.'));
     },
@@ -113,6 +120,7 @@ export const {
   deleteLeg,
   updateMTMTarget,
   updateMTMStopLoss,
+  updateMTMTrailing,
   deleteStateProp,
 } = strategySlice.actions;
 export default strategySlice.reducer;

@@ -34,8 +34,10 @@ export default function MTMTarget() {
   }
   function handleMTMType(event, value) {
     const name = 'type';
-    const payload = { name, value };
-    dispatch(updateMTMTarget(payload));
+    if (value !== null) {
+      const payload = { name, value };
+      dispatch(updateMTMTarget(payload));
+    }
   }
 
   return (
@@ -51,14 +53,19 @@ export default function MTMTarget() {
           <Typography fontSize='14px'>Type</Typography>
           <ToggleButtonGroup
             size='small'
-            color='primary'
             exclusive
             value={MTMTarget.type}
             onChange={handleMTMType}
           >
-            <ToggleButton value='None'>None</ToggleButton>
-            <ToggleButton value='mtm_in_percentage'>%</ToggleButton>
-            <ToggleButton value='mtm_in_total_amount'>₹</ToggleButton>
+            <ToggleButton color='error' value='None'>
+              None
+            </ToggleButton>
+            <ToggleButton color='secondary' value='mtm_in_percentage'>
+              %
+            </ToggleButton>
+            <ToggleButton color='success' value='mtm_in_total_amount'>
+              ₹
+            </ToggleButton>
           </ToggleButtonGroup>
         </Stack>
         {/* /////////////////// */}

@@ -244,13 +244,16 @@ export default function Positions() {
           <Typography>Buy/Sell</Typography>
           <ToggleButtonGroup
             size='small'
-            color='primary'
             exclusive
             value={positions.buysell}
             onChange={handleBuySell}
           >
-            <ToggleButton value='buy'>Buy</ToggleButton>
-            <ToggleButton value='sell'>Sell</ToggleButton>
+            <ToggleButton color='success' value='buy'>
+              Buy
+            </ToggleButton>
+            <ToggleButton color='error' value='sell'>
+              Sell
+            </ToggleButton>
           </ToggleButtonGroup>
         </Stack>
         {/* //////////////// */}

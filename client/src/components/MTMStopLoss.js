@@ -34,8 +34,10 @@ export default function MTMStopLoss() {
   }
   function handleMTMFixedStoploss(event, value) {
     const name = 'fixedStopLoss';
-    const payload = { name, value };
-    dispatch(updateMTMStopLoss(payload));
+    if (value !== null) {
+      const payload = { name, value };
+      dispatch(updateMTMStopLoss(payload));
+    }
   }
 
   return (
@@ -51,14 +53,19 @@ export default function MTMStopLoss() {
           <Typography fontSize='14px'>Fixed Stoploss</Typography>
           <ToggleButtonGroup
             size='small'
-            color='primary'
             exclusive
             value={MTMStopLoss.fixedStopLoss}
             onChange={handleMTMFixedStoploss}
           >
-            <ToggleButton value='None'>None</ToggleButton>
-            <ToggleButton value='mtm_in_percentage'>%</ToggleButton>
-            <ToggleButton value='mtm_in_total_amount'>₹</ToggleButton>
+            <ToggleButton color='error' value='None'>
+              None
+            </ToggleButton>
+            <ToggleButton color='secondary' value='mtm_in_percentage'>
+              %
+            </ToggleButton>
+            <ToggleButton color='success' value='mtm_in_total_amount'>
+              ₹
+            </ToggleButton>
           </ToggleButtonGroup>
         </Stack>
         {/* /////////////////// */}
