@@ -24,6 +24,7 @@ const initialPositions = {
   options: 'CE',
   buysell: 'buy',
   strike: 'ATM',
+  strikeDetails: 'ATM',
   quantity: 1,
   legOptions: {
     waitAndTrade: false,
@@ -76,6 +77,12 @@ export default function Positions() {
     const value = event.target.value;
     setPositions((prev) => {
       return { ...prev, strike: value };
+    });
+  }
+  function handleStrikeDetails(event) {
+    const value = event.target.value;
+    setPositions((prev) => {
+      return { ...prev, strikeDetails: value };
     });
   }
   function handleQuantity(event) {
@@ -186,7 +193,7 @@ export default function Positions() {
       <Typography variant='button' color='grey.600'>
         positions
       </Typography>
-      <Stack direction='row' spacing={4}>
+      <Stack direction='row' spacing={2}>
         {/* //////////////////// */}
         {/* //// instrument //// */}
         {/* //////////////////// */}
@@ -279,6 +286,29 @@ export default function Positions() {
             </FormControl>
           </Stack>
         )}
+        {/* //////////////////////// */}
+        {/* //// STRIKE DETAILS //// */}
+        {/* //////////////////////// */}
+        {positions.segment === 'options' && (
+          <Stack spacing={1}>
+            <Typography>Strike Details</Typography>
+            <FormControl size='small'>
+              <Select
+                name='strikeDetails'
+                value={positions.strikeDetails}
+                onChange={handleStrikeDetails}
+              >
+                {strikeOptions.map((item, index) => {
+                  return (
+                    <MenuItem key={index} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </Stack>
+        )}
         {/* ////////////////// */}
         {/* //// QUANTITY //// */}
         {/* ////////////////// */}
@@ -292,6 +322,7 @@ export default function Positions() {
           <TextField
             size='small'
             type='number'
+            name='quantity'
             value={positions.quantity}
             onChange={handleQuantity}
           />

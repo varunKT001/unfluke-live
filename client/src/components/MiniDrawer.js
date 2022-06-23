@@ -21,6 +21,7 @@ import { MiniDrawerList } from '../data';
 import { MenuItem } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../api/user';
+import { Link } from 'react-router-dom';
 
 const drawerWidth = 240;
 
@@ -157,6 +158,8 @@ export default function MiniDrawer({ children }) {
           {MiniDrawerList.map((item, index) => (
             <ListItem key={item.name} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
+                component={Link}
+                to={item.url}
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',

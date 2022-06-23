@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Login, Register, HomeRoute, PrivateRoute, Dashboard } from './pages';
+import {
+  Login,
+  Register,
+  HomeRoute,
+  PrivateRoute,
+  Dashboard,
+  AddStrategyForm,
+} from './pages';
 import { useDispatch } from 'react-redux';
 import { auth } from './api/user';
 
@@ -21,6 +28,7 @@ function App() {
         </Route>
         <Route path='/dashboard' element={<PrivateRoute />}>
           <Route index element={<Dashboard />} />
+          <Route path='add-strategy' element={<AddStrategyForm />} />
         </Route>
       </Routes>
     </BrowserRouter>

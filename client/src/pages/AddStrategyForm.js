@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, TextField, Divider, Button } from '@mui/material';
-import Positions from './Positions';
-import MTM from './MTM';
-import Strategy from './Strategy';
-import AdvancedSettings from './AdvancedSettings';
+import { Positions, Strategy, MTM, AdvancedSettings } from '../components';
 import { deepCopy } from '../utils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  saveStrategySettings,
   saveStrategyName,
+  saveStrategySettings,
 } from '../redux/slices/strategySlice';
 
 const initialStrategy = {
@@ -39,7 +36,7 @@ const initialStrategy = {
   daysBeforeExpiry: 4,
 };
 
-export default function AlgorithmForm() {
+export default function AddStrategyForm() {
   const dispatch = useDispatch();
   const { name } = useSelector((store) => store.strategy);
   const [strategyName, setStrategyName] = useState(name);
