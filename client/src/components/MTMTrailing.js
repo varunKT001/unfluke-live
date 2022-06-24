@@ -3,10 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import PercentIcon from '@mui/icons-material/Percent';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import {
-  updateMTMTrailing,
-  deleteStateProp,
-} from '../redux/slices/strategySlice';
-import {
   InputAdornment,
   Stack,
   TextField,
@@ -18,9 +14,13 @@ import {
   ToggleButton,
 } from '@mui/material';
 
-export default function MTMTrailing() {
+export default function MTMTrailing({
+  updateMTMTrailing,
+  deleteStateProp,
+  strategy,
+}) {
   const dispatch = useDispatch();
-  const { MTMTrailing } = useSelector((store) => store.strategy);
+  const { MTMTrailing } = useSelector((store) => store[strategy]);
 
   function handleChange(event) {
     const name = event.target.name;

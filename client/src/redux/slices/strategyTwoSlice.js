@@ -6,12 +6,6 @@ const initialState = {
   strategySettings: {},
   positions: {
     legs: [],
-    legOptions: {
-      moveSlToCost: true,
-      reEntry: false,
-      tradeOnlyFirstEntry: false,
-      waitAndTrade: true,
-    },
   },
   MTMTarget: {
     type: 'None',
@@ -35,45 +29,12 @@ const initialState = {
   },
 };
 
-const strategySlice = createSlice({
-  name: 'strategy',
+const strategyTwoSlice = createSlice({
+  name: 'strategyTwo',
   initialState,
   reducers: {
     addLeg: (state, action) => {
       state.positions.legs.push(action.payload);
-    },
-    changeLegOptions: (state, action) => {
-      state.positions.legOptions = {
-        ...state.positions.legOptions,
-        ...action.payload,
-      };
-      if (state.positions.legOptions.waitAndTrade) {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          return {
-            ...leg,
-            waitTime: { type: 'immediate', value: 0 },
-            squareOff: 'square_off_leg',
-          };
-        });
-      } else {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          delete leg.waitTime;
-          return leg;
-        });
-      }
-      if (state.positions.legOptions.reEntry) {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          return {
-            ...leg,
-            reEntrySetting: { type: 're_none', maxEntries: 'no_max_limit' },
-          };
-        });
-      } else {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          delete leg.reEntrySetting;
-          return leg;
-        });
-      }
     },
     saveStrategyName: (state, action) => {
       state.name = action.payload;
@@ -128,7 +89,6 @@ const strategySlice = createSlice({
 
 export const {
   addLeg,
-  changeLegOptions,
   saveStrategyName,
   saveStrategySettings,
   updateLeg,
@@ -138,5 +98,5 @@ export const {
   updateMTMTrailing,
   deleteStateProp,
   updateAdvancedSettings,
-} = strategySlice.actions;
-export default strategySlice.reducer;
+} = strategyTwoSlice.actions;
+export default strategyTwoSlice.reducer;

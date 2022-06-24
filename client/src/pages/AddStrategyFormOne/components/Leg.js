@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateLeg, deleteLeg } from '../redux/slices/strategySlice';
-import { range, capitalizeFirstLetter, getUserInput } from '../utils';
+import { updateLeg, deleteLeg } from '../../../redux/slices/strategyOneSlice';
+import { range, capitalizeFirstLetter, getUserInput } from '../../../utils';
 import {
   Stack,
   Button,

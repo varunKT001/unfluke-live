@@ -6,7 +6,8 @@ import {
   HomeRoute,
   PrivateRoute,
   Dashboard,
-  AddStrategyForm,
+  AddStrategyFormOne,
+  AddStrategyFormTwo,
 } from './pages';
 import { useDispatch } from 'react-redux';
 import { auth } from './api/user';
@@ -28,7 +29,8 @@ function App() {
         </Route>
         <Route path='/dashboard' element={<PrivateRoute />}>
           <Route index element={<Dashboard />} />
-          <Route path='add-strategy' element={<AddStrategyForm />} />
+          <Route path='add-strategy-1' element={<AddStrategyFormOne />} />
+          <Route path='add-strategy-2' element={<AddStrategyFormTwo />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PercentIcon from '@mui/icons-material/Percent';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-import { updateMTMTarget } from '../redux/slices/strategySlice';
 import {
   InputAdornment,
   Stack,
@@ -12,13 +11,13 @@ import {
   ToggleButton,
 } from '@mui/material';
 
-export default function MTMTarget() {
+export default function MTMTarget({ updateMTMTarget, strategy }) {
   const dispatch = useDispatch();
-  const { MTMTarget } = useSelector((store) => store.strategy);
+  const { MTMTarget } = useSelector((store) => store[strategy]);
 
   function handleChange(event) {
     const name = event.target.name;
-    const value = event.target.value;
+    let value = event.target.value;
     if (name === 'type' && value === 'None') {
       const payload = { name: 'value', value: 0 };
       dispatch(updateMTMTarget(payload));

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { range, deepCopy } from '../utils';
+import { range, deepCopy } from '../../../utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { addLeg, changeLegOptions } from '../redux/slices/strategySlice';
+import {
+  addLeg,
+  changeLegOptions,
+} from '../../../redux/slices/strategyOneSlice';
 import LegsContainer from './LegsContainer';
 import { v4 } from 'uuid';
 import {
@@ -48,7 +51,7 @@ const strikeOptions = [
 
 export default function Positions() {
   const dispatch = useDispatch();
-  const { legs } = useSelector((store) => store.strategy.positions);
+  const { legs } = useSelector((store) => store.strategyOne.positions);
   const [positions, setPositions] = useState(initialPositions);
 
   function handleinstrument(event) {

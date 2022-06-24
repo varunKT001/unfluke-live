@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PercentIcon from '@mui/icons-material/Percent';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-import { updateMTMStopLoss } from '../redux/slices/strategySlice';
 import {
   InputAdornment,
   Stack,
@@ -12,9 +11,9 @@ import {
   ToggleButton,
 } from '@mui/material';
 
-export default function MTMStopLoss() {
+export default function MTMStopLoss({ updateMTMStopLoss, strategy }) {
   const dispatch = useDispatch();
-  const { MTMStopLoss } = useSelector((store) => store.strategy);
+  const { MTMStopLoss } = useSelector((store) => store[strategy]);
 
   function handleChange(event) {
     const name = event.target.name;

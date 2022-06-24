@@ -15,12 +15,20 @@ const Dashboard = () => {
   return (
     <Stack direction='row' spacing={2}>
       <Button
-        name='add-strategy'
+        name='add-strategy-1'
         variant='contained'
         onClick={handleClick}
         startIcon={<AddCircleIcon />}
       >
         create strategy
+      </Button>
+      <Button
+        name='add-strategy-2'
+        variant='contained'
+        onClick={handleClick}
+        startIcon={<AddCircleIcon />}
+      >
+        create strategy 2
       </Button>
     </Stack>
   );

@@ -2,10 +2,6 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PercentIcon from '@mui/icons-material/Percent';
 import {
-  deleteStateProp,
-  updateAdvancedSettings,
-} from '../redux/slices/strategySlice';
-import {
   InputAdornment,
   Stack,
   TextField,
@@ -15,13 +11,17 @@ import {
   MenuItem,
 } from '@mui/material';
 
-export default function AdvancedSettings() {
+export default function AdvancedSettings({
+  updateAdvancedSettings,
+  deleteStateProp,
+  strategy,
+}) {
   const dispatch = useDispatch();
-  const { advancedSettings } = useSelector((store) => store.strategy);
+  const { advancedSettings } = useSelector((store) => store[strategy]);
 
   function handleChange(event) {
     const name = event.target.name;
-    const value = event.target.value;
+    let value = event.target.value;
     if (name.split('.')[1] === 'type') {
       if (value === 'market_M') {
         dispatch(

@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, TextField, Divider, Button } from '@mui/material';
-import { Positions, Strategy, MTM, AdvancedSettings } from '../components';
-import { deepCopy } from '../utils';
+import { Positions } from './components';
+import { MTM, Strategy, AdvancedSettings } from '../../components';
+import { deepCopy } from '../../utils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   saveStrategyName,
   saveStrategySettings,
-} from '../redux/slices/strategySlice';
+  updateMTMTarget,
+  updateMTMStopLoss,
+  updateMTMTrailing,
+  deleteStateProp,
+  updateAdvancedSettings,
+} from '../../redux/slices/strategyTwoSlice';
 
 const initialStrategy = {
   underlying: 'spot',
@@ -36,9 +42,9 @@ const initialStrategy = {
   daysBeforeExpiry: 4,
 };
 
-export default function AddStrategyForm() {
+export default function AddStrategyFormTwo() {
   const dispatch = useDispatch();
-  const { name } = useSelector((store) => store.strategy);
+  const { name } = useSelector((store) => store.strategyTwo);
   const [strategyName, setStrategyName] = useState(name);
   const [strategy, setStrategy] = useState(initialStrategy);
 
@@ -135,6 +141,7 @@ export default function AddStrategyForm() {
 
   useEffect(() => {
     handleSaveSettings();
+    // eslint-disable-next-line
   }, [strategyName, strategy]);
 
   return (
@@ -160,8 +167,22 @@ export default function AddStrategyForm() {
         }}
       />
       <Positions />
-      <MTM />
-      <AdvancedSettings />
+      <MTM
+        {...{
+          updateMTMTarget,
+          updateMTMStopLoss,
+          updateMTMTrailing,
+          deleteStateProp,
+          strategy: 'strategyTwo',
+        }}
+      />
+      <AdvancedSettings
+        {...{
+          updateAdvancedSettings,
+          deleteStateProp,
+          strategy: 'strategyTwo',
+        }}
+      />
       <Button variant='contained' sx={{ width: 'fit-content' }}>
         Save settings
       </Button>
