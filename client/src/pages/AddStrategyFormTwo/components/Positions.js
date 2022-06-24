@@ -334,7 +334,7 @@ export default function Positions() {
         {/* //// RHS //// */}
         {/* ///////////// */}
         <Stack spacing={1}>
-          <Typography>RHS</Typography>
+          <Typography>Type</Typography>
           <FormControl size='small'>
             <Select name='RHS' value={positions.RHS} onChange={handleRHS}>
               <MenuItem value='banknifty'>Banknifty</MenuItem>

@@ -1,16 +1,15 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HomeRoute, PrivateRoute } from './layouts';
+import { useDispatch } from 'react-redux';
+import { auth } from './api/user';
 import {
   Login,
   Register,
-  HomeRoute,
-  PrivateRoute,
   Dashboard,
   AddStrategyFormOne,
   AddStrategyFormTwo,
 } from './pages';
-import { useDispatch } from 'react-redux';
-import { auth } from './api/user';
 
 function App() {
   const dispatch = useDispatch();
