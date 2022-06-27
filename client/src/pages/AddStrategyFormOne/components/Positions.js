@@ -51,7 +51,9 @@ const strikeOptions = [
 
 export default function Positions() {
   const dispatch = useDispatch();
-  const { legs } = useSelector((store) => store.strategyOne.positions);
+  const { legs, legOptions } = useSelector(
+    (store) => store.strategyOne.positions
+  );
   const [positions, setPositions] = useState(initialPositions);
 
   function handleinstrument(event) {
@@ -179,6 +181,12 @@ export default function Positions() {
     }
     dispatch(addLeg(leg));
   }
+
+  useEffect(() => {
+    setPositions((prev) => {
+      return { ...prev, legOptions };
+    });
+  }, [legOptions]);
 
   useEffect(() => {
     const legOptions = deepCopy(positions.legOptions);

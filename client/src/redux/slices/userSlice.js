@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { login, logout, register, auth } from '../../api/user';
-// import toast from '../../config/toast';
 
 const initialState = {
   data: null,

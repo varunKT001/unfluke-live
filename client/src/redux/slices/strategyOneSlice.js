@@ -2,12 +2,18 @@ import { createSlice } from '@reduxjs/toolkit';
 import {
   setDeepObjProp as set,
   deleteDeepObjProp as unset,
+  deepCopy,
 } from '../../utils/miscUtils';
-import { saveStrategyToLocalStorage } from '../../utils/localStorage';
+import {
+  saveStrategyToLocalStorage,
+  updateStrategyInLocalStorage,
+} from '../../utils/localStorage';
+import { v4 } from 'uuid';
 
 const initialState = {
   name: 'strategy_name',
   strategyType: 'strategy_one',
+  status: 'active',
   strategySettings: {},
   positions: {
     legs: [],
@@ -129,7 +135,11 @@ const strategyOneSlice = createSlice({
       unset(state, action.payload.split('.'));
     },
     saveStrategy: (state) => {
-      saveStrategyToLocalStorage(state);
+      saveStrategyToLocalStorage({ ...state, id: state.id ? state.id : v4() });
+    },
+    loadStrategy: (state, action) => {
+      const newState = deepCopy(action.payload);
+      return newState;
     },
   },
 });
@@ -147,5 +157,6 @@ export const {
   deleteStateProp,
   updateAdvancedSettings,
   saveStrategy,
+  loadStrategy,
 } = strategyOneSlice.actions;
 export default strategyOneSlice.reducer;

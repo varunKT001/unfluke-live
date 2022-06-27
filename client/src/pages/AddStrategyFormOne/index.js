@@ -4,6 +4,7 @@ import { Positions } from './components';
 import { MTM, Strategy, AdvancedSettings } from '../../components';
 import { deepCopy } from '../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import {
   saveStrategyName,
   saveStrategySettings,
@@ -13,7 +14,10 @@ import {
   deleteStateProp,
   updateAdvancedSettings,
   saveStrategy,
+  loadStrategy,
 } from '../../redux/slices/strategyOneSlice';
+import { updateStrategy } from '../../api/strategies';
+import { getStrategiesFromLocalStorage } from '../../utils/localStorage';
 
 const initialStrategy = {
   underlying: 'spot',
@@ -43,8 +47,9 @@ const initialStrategy = {
   daysBeforeExpiry: 4,
 };
 
-export default function AddStrategyFormOne() {
+export default function AddStrategyFormOne(props) {
   const dispatch = useDispatch();
+  const params = useParams();
   const { name } = useSelector((store) => store.strategyOne);
   const [strategyName, setStrategyName] = useState(name);
   const [strategy, setStrategy] = useState(initialStrategy);
@@ -140,13 +145,33 @@ export default function AddStrategyFormOne() {
     dispatch(saveStrategyName(strategyName));
   }
   function createStrategy() {
+    if (props.isEditing) {
+      return dispatch(updateStrategy({ id: params.id, type: 'strategyOne' }));
+    }
     dispatch(saveStrategy());
+  }
+  function fetchStrategy(id) {
+    try {
+      const response = getStrategiesFromLocalStorage();
+      const strategy = response.find((s) => s.id === id);
+      dispatch(loadStrategy(strategy));
+      setStrategy(strategy.strategySettings);
+      setStrategyName(strategy.name);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {
     handleSaveSettings();
     // eslint-disable-next-line
   }, [strategyName, strategy]);
+
+  useEffect(() => {
+    if (props.isEditing && params.id) {
+      fetchStrategy(params.id);
+    }
+  }, [params]);
 
   return (
     <Stack spacing={4} divider={<Divider orientation='horizontal' flexItem />}>

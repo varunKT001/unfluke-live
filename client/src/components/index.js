@@ -6,6 +6,8 @@ import MTMTarget from './MTMTarget';
 import MTMStopLoss from './MTMStopLoss';
 import MTMTrailing from './MTMTrailing';
 import AdvancedSettings from './AdvancedSettings';
+import EnhancedTableHead from './EnhancedTableHead';
+import EnhancedTableToolbar from './EnhancedTableToolbar';
 
 export {
   MiniDrawer,
@@ -16,4 +18,6 @@ export {
   MTMStopLoss,
   MTMTrailing,
   AdvancedSettings,
+  EnhancedTableHead,
+  EnhancedTableToolbar,
 };

@@ -9,6 +9,7 @@ import {
   Dashboard,
   AddStrategyFormOne,
   AddStrategyFormTwo,
+  MyStrategies,
 } from './pages';
 
 function App() {
@@ -29,7 +30,16 @@ function App() {
         <Route path='/dashboard' element={<PrivateRoute />}>
           <Route index element={<Dashboard />} />
           <Route path='add-strategy-1' element={<AddStrategyFormOne />} />
+          <Route
+            path='edit-strategy-1/:id'
+            element={<AddStrategyFormOne isEditing={true} />}
+          />
           <Route path='add-strategy-2' element={<AddStrategyFormTwo />} />
+          <Route
+            path='edit-strategy-2/:id'
+            element={<AddStrategyFormTwo isEditing={true} />}
+          />
+          <Route path='my-strategies' element={<MyStrategies />} />
         </Route>
       </Routes>
     </BrowserRouter>

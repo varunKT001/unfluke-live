@@ -136,7 +136,7 @@ export default function MiniDrawer({ children }) {
             <Typography variant='h6' noWrap component='div'>
               Alignz Exports
             </Typography>
-            <SimpleMenu label={user.data.name}>
+            <SimpleMenu sx={{ color: 'white' }} label={user.data.name}>
               <MenuItem>Profile</MenuItem>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </SimpleMenu>

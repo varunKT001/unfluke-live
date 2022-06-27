@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
-export default function BasicMenu({ children, label }) {
+export default function BasicMenu({ children, label, sx }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const open = Boolean(anchorEl);
@@ -25,9 +25,7 @@ export default function BasicMenu({ children, label }) {
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup='true'
         aria-expanded={open ? 'true' : undefined}
-        sx={{
-          color: 'white',
-        }}
+        sx={sx}
         onClick={handleClick}
       >
         {label}
