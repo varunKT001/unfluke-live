@@ -1,7 +1,11 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateLeg, deleteLeg } from '../../../redux/slices/strategyOneSlice';
-import { range, capitalizeFirstLetter, getUserInput } from '../../../utils';
+import {
+  range,
+  capitalizeFirstLetter,
+  getUserInput,
+} from '../../../utils/miscUtils';
 import {
   Stack,
   Button,
@@ -36,7 +40,7 @@ const maxEntriesOptions = [
 
 export default function Leg(props) {
   const dispatch = useDispatch();
-  const { legOptions } = useSelector((store) => store.strategy.positions);
+  const { legOptions } = useSelector((store) => store.strategyOne.positions);
 
   function handleChange(event) {
     const name = event.target.name;

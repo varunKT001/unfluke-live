@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { range, deepCopy } from '../../../utils';
+import { range, deepCopy } from '../../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addLeg,

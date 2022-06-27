@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { range, deepCopy } from '../../../utils';
+import { range, deepCopy } from '../../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import { addLeg } from '../../../redux/slices/strategyTwoSlice';
 import LegsContainer from './LegsContainer';

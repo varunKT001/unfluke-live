@@ -1,8 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { setDeepObjProp as set, deleteDeepObjProp as unset } from '../../utils';
+import {
+  setDeepObjProp as set,
+  deleteDeepObjProp as unset,
+} from '../../utils/miscUtils';
+import { saveStrategyToLocalStorage } from '../../utils/localStorage';
 
 const initialState = {
   name: 'strategy_name',
+  strategyType: 'strategy_two',
   strategySettings: {},
   positions: {
     legs: [],
@@ -84,6 +89,9 @@ const strategyTwoSlice = createSlice({
     deleteStateProp: (state, action) => {
       unset(state, action.payload.split('.'));
     },
+    saveStrategy: (state) => {
+      saveStrategyToLocalStorage(state);
+    },
   },
 });
 
@@ -98,5 +106,6 @@ export const {
   updateMTMTrailing,
   deleteStateProp,
   updateAdvancedSettings,
+  saveStrategy,
 } = strategyTwoSlice.actions;
 export default strategyTwoSlice.reducer;

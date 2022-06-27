@@ -1,5 +1,5 @@
 import MemoryIcon from '@mui/icons-material/Memory';
 
 export const MiniDrawerList = [
-  { name: 'Algos', icon: <MemoryIcon />, url: '/dashboard' },
+  { name: 'Create strategy', icon: <MemoryIcon />, url: '/dashboard' },
 ];

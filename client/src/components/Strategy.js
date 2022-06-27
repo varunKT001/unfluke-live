@@ -1,5 +1,5 @@
 import React from 'react';
-import range from '../utils/range';
+import { range } from '../utils/miscUtils';
 import {
   Stack,
   Typography,

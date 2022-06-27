@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Stack, TextField, Divider, Button } from '@mui/material';
 import { Positions } from './components';
 import { MTM, Strategy, AdvancedSettings } from '../../components';
-import { deepCopy } from '../../utils';
+import { deepCopy } from '../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   saveStrategyName,
@@ -12,6 +12,7 @@ import {
   updateMTMTrailing,
   deleteStateProp,
   updateAdvancedSettings,
+  saveStrategy,
 } from '../../redux/slices/strategyTwoSlice';
 
 const initialStrategy = {
@@ -138,6 +139,9 @@ export default function AddStrategyFormTwo() {
     dispatch(saveStrategySettings(strategySettings));
     dispatch(saveStrategyName(strategyName));
   }
+  function createStrategy() {
+    dispatch(saveStrategy());
+  }
 
   useEffect(() => {
     handleSaveSettings();
@@ -183,7 +187,11 @@ export default function AddStrategyFormTwo() {
           strategy: 'strategyTwo',
         }}
       />
-      <Button variant='contained' sx={{ width: 'fit-content' }}>
+      <Button
+        variant='contained'
+        sx={{ width: 'fit-content' }}
+        onClick={createStrategy}
+      >
         Save settings
       </Button>
     </Stack>
