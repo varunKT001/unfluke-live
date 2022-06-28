@@ -190,7 +190,11 @@ export default function EnhancedTable() {
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar selected={selected} setSelected={setSelected} />
+        <EnhancedTableToolbar
+          selected={selected}
+          setSelected={setSelected}
+          heading='My strategies'
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}

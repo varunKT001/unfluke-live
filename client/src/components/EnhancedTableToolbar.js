@@ -44,7 +44,7 @@ export default function EnhancedTableToolbar(props) {
           id='tableTitle'
           component='div'
         >
-          My Strategies
+          {props.heading}
         </Typography>
       )}
 

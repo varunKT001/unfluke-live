@@ -10,6 +10,8 @@ import {
   AddStrategyFormOne,
   AddStrategyFormTwo,
   MyStrategies,
+  Orders,
+  Positions,
 } from './pages';
 
 function App() {
@@ -40,6 +42,8 @@ function App() {
             element={<AddStrategyFormTwo isEditing={true} />}
           />
           <Route path='my-strategies' element={<MyStrategies />} />
+          <Route path='orders' element={<Orders />} />
+          <Route path='positions' element={<Positions />} />
         </Route>
       </Routes>
     </BrowserRouter>
