@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { range, deepCopy } from '../../../utils/miscUtils';
+import { range, deepCopy } from '../../../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addLeg,
   changeLegOptions,
-} from '../../../redux/slices/strategyOneSlice';
+} from '../../../../redux/slices/strategyOneSlice';
 import LegsContainer from './LegsContainer';
 import { v4 } from 'uuid';
 import {
@@ -29,6 +29,25 @@ const initialPositions = {
   strike: 'ATM',
   strikeDetails: 'ATM',
   quantity: 1,
+  tradeType: 'MIS',
+  target: {
+    type: 'None',
+    value: 0,
+  },
+  stopLoss: {
+    type: 'None',
+    value: 0,
+  },
+  trailingStopLoss: {
+    type: 'None',
+    value: {
+      x: 0,
+      y: 0,
+    },
+  },
+  waitTime: { type: 'immediate', value: 0 },
+  reEntrySetting: { type: 're_none', maxEntries: 'no_max_limit' },
+  squareOff: 'square_off_leg',
   legOptions: {
     waitAndTrade: false,
     reEntry: false,
@@ -54,7 +73,10 @@ export default function Positions() {
   const { legs, legOptions } = useSelector(
     (store) => store.strategyOne.positions
   );
-  const [positions, setPositions] = useState(initialPositions);
+  const [positions, setPositions] = useState({
+    ...initialPositions,
+    legOptions,
+  });
 
   function handleinstrument(event) {
     const value = event.target.value;
@@ -144,53 +166,19 @@ export default function Positions() {
   function handleAddLeg() {
     let leg = deepCopy(positions);
     leg = {
-      ...leg,
       id: v4(),
-      tradeType: 'MIS',
-      target: {
-        type: 'None',
-        value: 0,
-      },
-      stopLoss: {
-        type: 'None',
-        value: 0,
-      },
-      trailingStopLoss: {
-        type: 'None',
-        value: {
-          x: 0,
-          y: 0,
-        },
-      },
-      squareOff: 'square_off_leg',
+      ...leg,
       legType: {
         type: leg.segment === 'options' ? 'leg' : 'futures',
         value: null,
       },
     };
-    if (leg.legOptions.waitAndTrade) {
-      leg.waitTime = { type: 'immediate', value: 0 };
-    }
-    if (leg.legOptions.reEntry) {
-      leg.reEntrySetting = { type: 're_none', maxEntries: 'no_max_limit' };
-    }
     delete leg.legOptions;
-    if (leg.segment === 'futures') {
-      delete leg.options;
-      delete leg.strike;
-    }
     dispatch(addLeg(leg));
   }
 
   useEffect(() => {
-    setPositions((prev) => {
-      return { ...prev, legOptions };
-    });
-  }, [legOptions]);
-
-  useEffect(() => {
-    const legOptions = deepCopy(positions.legOptions);
-    dispatch(changeLegOptions(legOptions));
+    dispatch(changeLegOptions(positions.legOptions));
     // eslint-disable-next-line
   }, [
     positions.legOptions.waitAndTrade,

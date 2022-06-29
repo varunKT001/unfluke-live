@@ -1,8 +1,10 @@
+import { v4 } from 'uuid';
+
 function saveStrategyToLocalStorage(strategy) {
   const strategies = JSON.parse(localStorage.getItem('strategies')) || [];
-  strategies.push(strategy);
+  strategies.push({ id: v4(), ...strategy });
   localStorage.setItem('strategies', JSON.stringify(strategies));
-  return strategies;
+  return { message: 'Strategy saved' };
 }
 
 function getStrategiesFromLocalStorage() {
@@ -15,15 +17,15 @@ function deleteStrategiesFromLocalStorage(IDs) {
     (strategy) => !IDs.includes(strategy.id)
   );
   localStorage.setItem('strategies', JSON.stringify(newStrategies));
-  return newStrategies;
+  return { message: 'Strategy removed' };
 }
 
 function updateStrategyInLocalStorage({ id, state }) {
   const strategies = JSON.parse(localStorage.getItem('strategies')) || [];
   const indexOfStrategy = strategies.findIndex((s) => s.id === id);
-  strategies[indexOfStrategy] = state;
+  strategies[indexOfStrategy] = { id, ...state };
   localStorage.setItem('strategies', JSON.stringify(strategies));
-  return strategies;
+  return { message: 'Strategy updated' };
 }
 
 function toggleStrategyStatusInLocalStorage(id) {
@@ -32,7 +34,7 @@ function toggleStrategyStatusInLocalStorage(id) {
   strategies[indexOfStrategy].status =
     strategies[indexOfStrategy].status === 'active' ? 'disabled' : 'active';
   localStorage.setItem('strategies', JSON.stringify(strategies));
-  return strategies;
+  return { message: `Strategy ${strategies[indexOfStrategy].status}` };
 }
 
 export {

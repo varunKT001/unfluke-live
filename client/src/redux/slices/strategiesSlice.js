@@ -3,6 +3,7 @@ import {
   fetchStrategies,
   deleteStrategies,
   toggleStrategyStatus,
+  addStrategy,
 } from '../../api/strategies';
 
 const initialState = {
@@ -14,6 +15,20 @@ const strategiesSlice = createSlice({
   name: 'strategies',
   initialState,
   extraReducers: {
+    /////////////
+    //// ADD ////
+    /////////////
+    [addStrategy.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [addStrategy.fulfilled]: (state, { payload }) => {
+      state.isLoading = false;
+      alert(payload);
+    },
+    [addStrategy.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+      alert(payload);
+    },
     ///////////////
     //// FETCH ////
     ///////////////
@@ -24,8 +39,9 @@ const strategiesSlice = createSlice({
       state.isLoading = false;
       state.strategies = payload;
     },
-    [fetchStrategies.pending]: (state) => {
+    [fetchStrategies.rejected]: (state, { payload }) => {
       state.isLoading = false;
+      alert(payload);
     },
     ////////////////
     //// DELETE ////
@@ -35,10 +51,11 @@ const strategiesSlice = createSlice({
     },
     [deleteStrategies.fulfilled]: (state, { payload }) => {
       state.isLoading = false;
-      state.strategies = payload;
+      alert(payload);
     },
-    [deleteStrategies.pending]: (state) => {
+    [deleteStrategies.rejected]: (state, { payload }) => {
       state.isLoading = false;
+      alert(payload);
     },
     ////////////////
     //// TOGGLE ////
@@ -48,10 +65,11 @@ const strategiesSlice = createSlice({
     },
     [toggleStrategyStatus.fulfilled]: (state, { payload }) => {
       state.isLoading = false;
-      state.strategies = payload;
+      alert(payload);
     },
-    [toggleStrategyStatus.pending]: (state) => {
+    [toggleStrategyStatus.rejected]: (state, { payload }) => {
       state.isLoading = false;
+      alert(payload);
     },
   },
 });

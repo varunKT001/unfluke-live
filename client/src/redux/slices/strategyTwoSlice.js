@@ -1,20 +1,37 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {
-  setDeepObjProp as set,
-  deleteDeepObjProp as unset,
-  deepCopy,
-} from '../../utils/miscUtils';
-import {
-  saveStrategyToLocalStorage,
-  updateStrategyInLocalStorage,
-} from '../../utils/localStorage';
-import { v4 } from 'uuid';
+import { setDeepObjProp as set } from '../../utils/miscUtils';
 
 const initialState = {
   name: 'strategy_name',
   strategyType: 'strategy_two',
   status: 'active',
-  strategySettings: {},
+  strategySettings: {
+    underlying: 'spot',
+    tradeType: 'intraday',
+    duration: 'STBT_BTST',
+    weekDays: ['monday', 'wednessday', 'friday'],
+    startTime: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    endTime: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    nextDayEndTime: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    checkConditionNextDayAfter: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    daysBeforeExpiry: 4,
+  },
   positions: {
     legs: [],
   },
@@ -29,13 +46,24 @@ const initialState = {
   MTMTrailing: {
     value: 'None',
     type: 'percentage',
+    values: { x: 0, y: 0 },
   },
   advancedSettings: {
     entry: {
       type: 'market_M',
+      options: {
+        triggerAndPriceLimitBufferIn: 'percentage',
+        triggerAndPriceLimitBufferValue: '3',
+        entryWithMarketOrderIfOpenForN: '10',
+      },
     },
     exit: {
       type: 'market_M',
+      options: {
+        triggerAndPriceLimitBufferIn: 'percentage',
+        triggerAndPriceLimitBufferValue: '3',
+        entryWithMarketOrderIfOpenForN: '10',
+      },
     },
   },
 };
@@ -47,11 +75,8 @@ const strategyTwoSlice = createSlice({
     addLeg: (state, action) => {
       state.positions.legs.push(action.payload);
     },
-    saveStrategyName: (state, action) => {
-      state.name = action.payload;
-    },
-    saveStrategySettings: (state, action) => {
-      state.strategySettings = action.payload;
+    onChange: (state, { payload }) => {
+      set(state, payload.name.split('.'), payload.value);
     },
     updateLeg: (state, action) => {
       let leg = state.positions.legs.find(
@@ -92,31 +117,25 @@ const strategyTwoSlice = createSlice({
         action.payload.value
       );
     },
-    deleteStateProp: (state, action) => {
-      unset(state, action.payload.split('.'));
+    setEditStrategy: (state, { payload }) => {
+      return { ...state, isEditing: true, ...payload };
     },
-    saveStrategy: (state) => {
-      saveStrategyToLocalStorage({ ...state, id: state.id ? state.id : v4() });
-    },
-    loadStrategy: (state, action) => {
-      const newState = deepCopy(action.payload);
-      return newState;
+    clearValues: (state) => {
+      return { ...initialState };
     },
   },
 });
 
 export const {
   addLeg,
-  saveStrategyName,
-  saveStrategySettings,
   updateLeg,
   deleteLeg,
   updateMTMTarget,
   updateMTMStopLoss,
   updateMTMTrailing,
-  deleteStateProp,
   updateAdvancedSettings,
-  saveStrategy,
-  loadStrategy,
+  onChange,
+  setEditStrategy,
+  clearValues,
 } = strategyTwoSlice.actions;
 export default strategyTwoSlice.reducer;

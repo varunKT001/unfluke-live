@@ -1,11 +1,14 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { updateLeg, deleteLeg } from '../../../redux/slices/strategyTwoSlice';
+import {
+  updateLeg,
+  deleteLeg,
+} from '../../../../redux/slices/strategyTwoSlice';
 import {
   range,
   capitalizeFirstLetter,
   getUserInput,
-} from '../../../utils/miscUtils';
+} from '../../../../utils/miscUtils';
 import {
   Stack,
   Button,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { range, deepCopy } from '../../../utils/miscUtils';
+import { range, deepCopy } from '../../../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
-import { addLeg } from '../../../redux/slices/strategyTwoSlice';
+import { addLeg } from '../../../../redux/slices/strategyTwoSlice';
 import LegsContainer from './LegsContainer';
 import { v4 } from 'uuid';
 import {
@@ -24,6 +24,7 @@ const initialPositions = {
   strike: 'ATM',
   strikeDetails: 'ATM',
   quantity: 1,
+  tradeType: 'MIS',
   timeFrame: '1',
   indicator_1: 'banknifty',
   operator: 'banknifty',
@@ -120,12 +121,11 @@ export default function Positions() {
     let leg = deepCopy(positions);
     leg = {
       id: v4(),
-      tradeType: 'MIS',
+      ...leg,
       legType: {
         type: leg.segment === 'options' ? 'leg' : 'futures',
         value: null,
       },
-      ...leg,
     };
     dispatch(addLeg(leg));
   }

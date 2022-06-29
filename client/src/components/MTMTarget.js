@@ -18,22 +18,19 @@ export default function MTMTarget({ updateMTMTarget, strategy }) {
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
-    if (name === 'type' && value === 'None') {
-      const payload = { name: 'value', value: 0 };
-      dispatch(updateMTMTarget(payload));
-    }
     if (name === 'value' && value < 0) {
       value = 0;
     }
-    const payload = {
-      name,
-      value,
-    };
+    const payload = { name, value };
     dispatch(updateMTMTarget(payload));
   }
   function handleMTMType(event, value) {
     const name = 'type';
     if (value !== null) {
+      if (value === 'None') {
+        const payload = { name: 'value', value: 0 };
+        dispatch(updateMTMTarget(payload));
+      }
       const payload = { name, value };
       dispatch(updateMTMTarget(payload));
     }

@@ -1,27 +1,46 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {
-  setDeepObjProp as set,
-  deleteDeepObjProp as unset,
-  deepCopy,
-} from '../../utils/miscUtils';
-import {
-  saveStrategyToLocalStorage,
-  updateStrategyInLocalStorage,
-} from '../../utils/localStorage';
-import { v4 } from 'uuid';
+import { setDeepObjProp as set } from '../../utils/miscUtils';
 
 const initialState = {
   name: 'strategy_name',
   strategyType: 'strategy_one',
   status: 'active',
-  strategySettings: {},
+  isEditing: false,
+  editStrategyId: '',
+  strategySettings: {
+    underlying: 'spot',
+    tradeType: 'intraday',
+    duration: 'STBT_BTST',
+    weekDays: ['monday', 'wednessday', 'friday'],
+    startTime: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    endTime: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    nextDayEndTime: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    checkConditionNextDayAfter: {
+      hour: 9,
+      minute: 15,
+      second: 0,
+    },
+    daysBeforeExpiry: 4,
+  },
   positions: {
     legs: [],
     legOptions: {
-      moveSlToCost: true,
+      moveSlToCost: false,
       reEntry: false,
       tradeOnlyFirstEntry: false,
-      waitAndTrade: true,
+      waitAndTrade: false,
     },
   },
   MTMTarget: {
@@ -35,13 +54,24 @@ const initialState = {
   MTMTrailing: {
     value: 'None',
     type: 'percentage',
+    values: { x: 0, y: 0 },
   },
   advancedSettings: {
     entry: {
       type: 'market_M',
+      options: {
+        triggerAndPriceLimitBufferIn: 'percentage',
+        triggerAndPriceLimitBufferValue: '3',
+        entryWithMarketOrderIfOpenForN: '10',
+      },
     },
     exit: {
       type: 'market_M',
+      options: {
+        triggerAndPriceLimitBufferIn: 'percentage',
+        triggerAndPriceLimitBufferValue: '3',
+        entryWithMarketOrderIfOpenForN: '10',
+      },
     },
   },
 };
@@ -58,39 +88,9 @@ const strategyOneSlice = createSlice({
         ...state.positions.legOptions,
         ...action.payload,
       };
-      if (state.positions.legOptions.waitAndTrade) {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          return {
-            ...leg,
-            waitTime: { type: 'immediate', value: 0 },
-            squareOff: 'square_off_leg',
-          };
-        });
-      } else {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          delete leg.waitTime;
-          return leg;
-        });
-      }
-      if (state.positions.legOptions.reEntry) {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          return {
-            ...leg,
-            reEntrySetting: { type: 're_none', maxEntries: 'no_max_limit' },
-          };
-        });
-      } else {
-        state.positions.legs = state.positions.legs.map((leg) => {
-          delete leg.reEntrySetting;
-          return leg;
-        });
-      }
     },
-    saveStrategyName: (state, action) => {
-      state.name = action.payload;
-    },
-    saveStrategySettings: (state, action) => {
-      state.strategySettings = action.payload;
+    onChange: (state, { payload }) => {
+      set(state, payload.name.split('.'), payload.value);
     },
     updateLeg: (state, action) => {
       let leg = state.positions.legs.find(
@@ -131,15 +131,11 @@ const strategyOneSlice = createSlice({
         action.payload.value
       );
     },
-    deleteStateProp: (state, action) => {
-      unset(state, action.payload.split('.'));
+    setEditStrategy: (state, { payload }) => {
+      return { ...state, isEditing: true, ...payload };
     },
-    saveStrategy: (state) => {
-      saveStrategyToLocalStorage({ ...state, id: state.id ? state.id : v4() });
-    },
-    loadStrategy: (state, action) => {
-      const newState = deepCopy(action.payload);
-      return newState;
+    clearValues: (state) => {
+      return { ...initialState };
     },
   },
 });
@@ -147,16 +143,16 @@ const strategyOneSlice = createSlice({
 export const {
   addLeg,
   changeLegOptions,
-  saveStrategyName,
-  saveStrategySettings,
   updateLeg,
   deleteLeg,
   updateMTMTarget,
   updateMTMStopLoss,
   updateMTMTrailing,
-  deleteStateProp,
   updateAdvancedSettings,
   saveStrategy,
   loadStrategy,
+  onChange,
+  setEditStrategy,
+  clearValues,
 } = strategyOneSlice.actions;
 export default strategyOneSlice.reducer;

@@ -1,15 +1,16 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, Navigate } from 'react-router-dom';
+import { MiniDrawer } from '../components';
 
-const HomeRoute = () => {
+const PrivateRoute = ({ children }) => {
   const user = useSelector((store) => store.user);
 
-  if (user.data) {
-    return <Navigate to='/dashboard' />;
+  if (!user.data) {
+    return <Navigate to='/login' />;
   } else {
-    return <Outlet />;
+    return children;
   }
 };
 
-export default HomeRoute;
+export default PrivateRoute;

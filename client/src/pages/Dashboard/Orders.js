@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { positions } from '../utils/data';
+import { orders } from '../../utils/dummyData';
 import { visuallyHidden } from '@mui/utils';
 import {
   Box,
@@ -39,6 +39,12 @@ function getUniqueLegProps(legs, prop) {
 
 const headCells = [
   {
+    id: 'id',
+    numeric: false,
+    disablePadding: false,
+    label: 'Order ID',
+  },
+  {
     id: 'name',
     numeric: false,
     disablePadding: false,
@@ -51,22 +57,34 @@ const headCells = [
     label: 'Symbol',
   },
   {
-    id: 'netQuantity',
+    id: 'transactionType',
     numeric: false,
     disablePadding: false,
-    label: 'Net Quantity',
+    label: 'Transaction Type',
   },
   {
-    id: 'LTP',
+    id: 'time',
     numeric: false,
     disablePadding: false,
-    label: 'LTP',
+    label: 'Time',
   },
   {
-    id: 'PnL',
+    id: 'product',
     numeric: false,
     disablePadding: false,
-    label: 'PnL',
+    label: 'Product',
+  },
+  {
+    id: 'quantity',
+    numeric: false,
+    disablePadding: false,
+    label: 'Quantity',
+  },
+  {
+    id: 'price',
+    numeric: false,
+    disablePadding: false,
+    label: 'Price',
   },
 ];
 
@@ -75,8 +93,7 @@ export default function EnhancedTable() {
   const [orderBy, setOrderBy] = useState('calories');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [rows, setRows] = useState([...positions]);
-  const [sum, setSum] = useState(0);
+  const [rows, setRows] = useState([...orders]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -100,15 +117,6 @@ export default function EnhancedTable() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  useEffect(() => {
-    setSum((prev) => {
-      return rows.reduce((sum, row) => {
-        sum += parseInt(row.PnL);
-        return sum;
-      }, 0);
-    });
-  }, [rows]);
-
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
@@ -124,7 +132,7 @@ export default function EnhancedTable() {
             id='tableTitle'
             component='div'
           >
-            Positions
+            Orders
           </Typography>
         </Toolbar>
         <TableContainer>
@@ -168,25 +176,19 @@ export default function EnhancedTable() {
                 .map((row, index) => {
                   return (
                     <TableRow hover tabIndex={-1} key={index}>
+                      <TableCell>{row.id}</TableCell>
                       <TableCell>{row.name}</TableCell>
                       <TableCell>{row.symbol}</TableCell>
-                      <TableCell>{row.netQuantity}</TableCell>
-                      <TableCell>{row.LTP}</TableCell>
-                      <TableCell
-                        sx={{ color: parseInt(row.PnL) > 0 ? 'green' : 'red' }}
-                      >
-                        {row.PnL}
+                      <TableCell>{row.transactionType}</TableCell>
+                      <TableCell>
+                        {`${row.time.hour}:${row.time.minute}:${row.time.seconds}`}
                       </TableCell>
+                      <TableCell>{row.product}</TableCell>
+                      <TableCell>{row.quantity}</TableCell>
+                      <TableCell>{row.price}</TableCell>
                     </TableRow>
                   );
                 })}
-              <TableRow hover tabIndex={-1}>
-                <TableCell sx={{ fontWeight: 'bold' }}>Total</TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell sx={{ color: 'blue' }}>{sum}</TableCell>
-              </TableRow>
               {emptyRows > 0 && (
                 <TableRow
                   style={{

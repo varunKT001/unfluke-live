@@ -14,24 +14,16 @@ import {
   ToggleButton,
 } from '@mui/material';
 
-export default function MTMTrailing({
-  updateMTMTrailing,
-  deleteStateProp,
-  strategy,
-}) {
+export default function MTMTrailing({ updateMTMTrailing, strategy }) {
   const dispatch = useDispatch();
   const { MTMTrailing } = useSelector((store) => store[strategy]);
 
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
-    if (name === 'value') {
-      if (value === 'None') {
-        dispatch(deleteStateProp(`MTMTrailing.values`));
-      } else {
-        const payload = { name: 'values', value: { x: 0, y: 0 } };
-        dispatch(updateMTMTrailing(payload));
-      }
+    if (name === 'value' && value === 'None') {
+      const payload = { name: 'values', value: { x: 0, y: 0 } };
+      dispatch(updateMTMTrailing(payload));
     }
     if (name.split('.')[0] === 'values' && value < 0) {
       value = 0;

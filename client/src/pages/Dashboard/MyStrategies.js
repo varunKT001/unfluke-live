@@ -3,7 +3,7 @@ import {
   SimpleMenu,
   EnhancedTableHead,
   EnhancedTableToolbar,
-} from '../components';
+} from '../../components';
 import {
   Chip,
   Box,
@@ -17,10 +17,13 @@ import {
   Checkbox,
   MenuItem,
   Stack,
+  Typography,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStrategies, toggleStrategyStatus } from '../api/strategies';
-import { useNavigate } from 'react-router-dom';
+import { fetchStrategies, toggleStrategyStatus } from '../../api/strategies';
+import { setEditStrategy as setEditStrategyOne } from '../../redux/slices/strategyOneSlice';
+import { setEditStrategy as setEditStrategyTwo } from '../../redux/slices/strategyTwoSlice';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -90,14 +93,12 @@ const headCells = [
 
 export default function EnhancedTable() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { strategies } = useSelector((store) => store.strategies);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('calories');
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [rows, setRows] = useState([]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -107,7 +108,7 @@ export default function EnhancedTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      const newSelecteds = strategies.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
@@ -144,48 +145,20 @@ export default function EnhancedTable() {
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-  const createRows = (data) => {
-    return [
-      ...data.map((strategy) => {
-        const {
-          id,
-          name,
-          strategySettings: { startTime, endTime },
-          status,
-          positions: { legs },
-        } = strategy;
-        const start = `${startTime.hour}:${startTime.minute}:${startTime.second}`;
-        const end = `${endTime.hour}:${endTime.minute}:${endTime.second}`;
-        const instruments = getUniqueLegProps(legs, 'instrument');
-        const segments = getUniqueLegProps(legs, 'segment');
-        return { id, name, start, end, instruments, segments, status };
-      }),
-    ];
-  };
-
-  const editStrategy = (id) => {
-    const strategy = strategies.find((s) => s.id === id);
-    navigate(
-      `/dashboard/edit-strategy-${
-        strategy.strategyType === 'strategy_one' ? '1' : '2'
-      }/${id}`
-    );
-  };
-
-  const toggleStatus = (id) => {
-    dispatch(toggleStrategyStatus(id));
-  };
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - strategies.length) : 0;
 
   useEffect(() => {
     dispatch(fetchStrategies());
     // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    setRows(createRows(strategies));
-  }, [strategies]);
+  if (strategies.length < 1) {
+    return (
+      <Box sx={{ width: '100%' }}>
+        <Typography>No strategies found...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -207,17 +180,18 @@ export default function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={strategies.length}
               headCells={headCells}
             />
             <TableBody>
-              {rows
+              {strategies
                 .slice()
                 .sort(getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
+                  const { id, ...rowWithoutId } = row;
 
                   return (
                     <TableRow
@@ -246,15 +220,26 @@ export default function EnhancedTable() {
                       >
                         {row.name}
                       </TableCell>
-                      <TableCell align='right'>{row.start}</TableCell>
-                      <TableCell align='right'>{row.end}</TableCell>
+                      <TableCell align='right'>
+                        {`${row.strategySettings.startTime.hour}:
+                        ${row.strategySettings.startTime.minute}:
+                        ${row.strategySettings.startTime.second}`}
+                      </TableCell>
+                      <TableCell align='right'>
+                        {`${row.strategySettings.endTime.hour}:
+                        ${row.strategySettings.endTime.minute}:
+                        ${row.strategySettings.endTime.second}`}
+                      </TableCell>
                       <TableCell align='right'>
                         <Stack
                           direction='row'
                           spacing={1}
                           justifyContent='flex-end'
                         >
-                          {row.instruments.map((instrument, index) => {
+                          {getUniqueLegProps(
+                            row.positions.legs,
+                            'instrument'
+                          ).map((instrument, index) => {
                             return (
                               <Chip
                                 size='small'
@@ -271,11 +256,17 @@ export default function EnhancedTable() {
                           spacing={1}
                           justifyContent='flex-end'
                         >
-                          {row.segments.map((segment, index) => {
-                            return (
-                              <Chip size='small' key={index} label={segment} />
-                            );
-                          })}
+                          {getUniqueLegProps(row.positions.legs, 'segment').map(
+                            (segment, index) => {
+                              return (
+                                <Chip
+                                  size='small'
+                                  key={index}
+                                  label={segment}
+                                />
+                              );
+                            }
+                          )}
                         </Stack>
                       </TableCell>
                       <TableCell align='right'>
@@ -287,16 +278,34 @@ export default function EnhancedTable() {
                       <TableCell align='right'>
                         <SimpleMenu label='actions'>
                           <MenuItem
+                            component={Link}
+                            to={`/add-strategy-${
+                              row.strategyType === 'strategy_one' ? '1' : '2'
+                            }`}
                             value='edit'
-                            onClick={() => editStrategy(row.id)}
+                            onClick={() =>
+                              row.strategyType === 'strategy_one'
+                                ? dispatch(
+                                    setEditStrategyOne({
+                                      editStrategyId: id,
+                                      ...rowWithoutId,
+                                    })
+                                  )
+                                : dispatch(
+                                    setEditStrategyTwo({
+                                      editStrategyId: id,
+                                      ...rowWithoutId,
+                                    })
+                                  )
+                            }
                           >
                             Edit
                           </MenuItem>
                           <MenuItem
-                            value='stop'
-                            onClick={() => toggleStatus(row.id)}
+                            value='start_stop'
+                            onClick={() => dispatch(toggleStrategyStatus(id))}
                           >
-                            Stop
+                            Start/Stop
                           </MenuItem>
                           <MenuItem value='square_off'>
                             Square Off Trades
@@ -321,7 +330,7 @@ export default function EnhancedTable() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component='div'
-          count={rows.length}
+          count={strategies.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

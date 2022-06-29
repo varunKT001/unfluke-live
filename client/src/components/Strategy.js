@@ -1,5 +1,7 @@
 import React from 'react';
 import { range } from '../utils/miscUtils';
+import { useDispatch } from 'react-redux';
+import { onChange } from '../redux/slices/strategyTwoSlice';
 import {
   Stack,
   Typography,
@@ -18,18 +20,36 @@ const sliderMarks = [
 ];
 
 export default function Strategy(props) {
+  const dispatch = useDispatch();
   const {
-    strategy,
-    handleUnderlying,
-    handleTradeType,
-    handleWeekDays,
-    handleDuration,
-    handleStartTime,
-    handleEndTime,
-    handleNextDayEndTime,
-    handleCheckConditionNextDayAfter,
-    handleDaysBeforeExpiry,
+    underlying,
+    tradeType,
+    duration,
+    weekDays,
+    startTime,
+    endTime,
+    nextDayEndTime,
+    checkConditionNextDayAfter,
+    daysBeforeExpiry,
+    handleChange,
   } = props;
+
+  function handleUnderlying(event, value) {
+    const e = { target: { name: 'strategySettings.underlying', value } };
+    handleChange(e);
+  }
+  function handleTradeType(event, value) {
+    const e = { target: { name: 'strategySettings.tradeType', value } };
+    handleChange(e);
+  }
+  function handleWeekDays(event, value) {
+    const e = { target: { name: 'strategySettings.weekDays', value } };
+    handleChange(e);
+  }
+  function handleDaysBeforeExpiry(event, value) {
+    const e = { target: { name: 'strategySettings.daysBeforeExpiry', value } };
+    handleChange(e);
+  }
 
   return (
     <Stack spacing={4}>
@@ -43,7 +63,8 @@ export default function Strategy(props) {
             size='small'
             color='primary'
             exclusive
-            value={strategy.underlying}
+            name='strategySettings.underlying'
+            value={underlying}
             onChange={handleUnderlying}
           >
             <ToggleButton value='spot'>Spot</ToggleButton>
@@ -59,7 +80,8 @@ export default function Strategy(props) {
             size='small'
             color='primary'
             exclusive
-            value={strategy.tradeType}
+            name='strategySettings.tradeType'
+            value={tradeType}
             onChange={handleTradeType}
           >
             <ToggleButton value='intraday'>Intraday</ToggleButton>
@@ -69,14 +91,14 @@ export default function Strategy(props) {
         {/* ////////////////// */}
         {/* //// DURATION //// */}
         {/* ////////////////// */}
-        {strategy.tradeType === 'positional' && (
+        {tradeType === 'positional' && (
           <Stack spacing={1}>
             <Typography>Duration</Typography>
             <FormControl size='small'>
               <Select
-                name='duration'
-                value={strategy.duration}
-                onChange={handleDuration}
+                name='strategySettings.duration'
+                value={duration}
+                onChange={handleChange}
               >
                 <MenuItem value='STBT_BTST'>STBT/BTST</MenuItem>
                 <MenuItem value='N_days_before_expiry'>
@@ -94,7 +116,8 @@ export default function Strategy(props) {
           <ToggleButtonGroup
             size='small'
             color='primary'
-            value={strategy.weekDays}
+            name='strategySettings.weekDays'
+            value={weekDays}
             onChange={handleWeekDays}
           >
             <ToggleButton value='monday'>mon</ToggleButton>
@@ -114,9 +137,9 @@ export default function Strategy(props) {
           <Stack direction='row' spacing={1}>
             <FormControl size='small'>
               <Select
-                name='hour'
-                value={strategy.startTime.hour}
-                onChange={handleStartTime}
+                name='strategySettings.startTime.hour'
+                value={startTime.hour}
+                onChange={handleChange}
               >
                 {range(9, 15, 1).map((item, index) => {
                   return (
@@ -130,9 +153,9 @@ export default function Strategy(props) {
             </FormControl>
             <FormControl size='small'>
               <Select
-                name='minute'
-                value={strategy.startTime.minute}
-                onChange={handleStartTime}
+                name='strategySettings.startTime.minute'
+                value={startTime.minute}
+                onChange={handleChange}
               >
                 {range(0, 59, 1).map((item, index) => {
                   return (
@@ -146,9 +169,9 @@ export default function Strategy(props) {
             </FormControl>
             <FormControl size='small'>
               <Select
-                name='second'
-                value={strategy.startTime.second}
-                onChange={handleStartTime}
+                name='strategySettings.startTime.second'
+                value={startTime.second}
+                onChange={handleChange}
               >
                 {range(0, 59, 1).map((item, index) => {
                   return (
@@ -165,36 +188,36 @@ export default function Strategy(props) {
         {/* //////////////////////////// */}
         {/* //// DAYS BEFORE EXPIRY //// */}
         {/* //////////////////////////// */}
-        {strategy.tradeType === 'positional' &&
-          strategy.duration === 'N_days_before_expiry' && (
-            <Stack spacing={1}>
-              <Typography>End day</Typography>
-              <Slider
-                defaultValue={4}
-                value={strategy.daysBeforeExpiry}
-                min={0}
-                max={4}
-                step={1}
-                marks={sliderMarks}
-                valueLabelDisplay='auto'
-                onChange={handleDaysBeforeExpiry}
-              />
-            </Stack>
-          )}
+        {tradeType === 'positional' && duration === 'N_days_before_expiry' && (
+          <Stack spacing={1}>
+            <Typography>End day</Typography>
+            <Slider
+              name='strategySettings.daysBeforeExpiry'
+              defaultValue={4}
+              value={daysBeforeExpiry}
+              min={0}
+              max={4}
+              step={1}
+              marks={sliderMarks}
+              valueLabelDisplay='auto'
+              onChange={handleDaysBeforeExpiry}
+            />
+          </Stack>
+        )}
         {/* ////////////////// */}
         {/* //// END TIME //// */}
         {/* ////////////////// */}
-        {(strategy.tradeType === 'intraday' ||
-          (strategy.tradeType === 'positional' &&
-            strategy.duration === 'N_days_before_expiry')) && (
+        {(tradeType === 'intraday' ||
+          (tradeType === 'positional' &&
+            duration === 'N_days_before_expiry')) && (
           <Stack spacing={1}>
             <Typography>End time</Typography>
             <Stack direction='row' spacing={1}>
               <FormControl size='small'>
                 <Select
-                  name='hour'
-                  value={strategy.endTime.hour}
-                  onChange={handleEndTime}
+                  name='strategySettings.endTime.hour'
+                  value={endTime.hour}
+                  onChange={handleChange}
                 >
                   {range(9, 15, 1).map((item, index) => {
                     return (
@@ -208,9 +231,9 @@ export default function Strategy(props) {
               </FormControl>
               <FormControl size='small'>
                 <Select
-                  name='minute'
-                  value={strategy.endTime.minute}
-                  onChange={handleEndTime}
+                  name='strategySettings.endTime.minute'
+                  value={endTime.minute}
+                  onChange={handleChange}
                 >
                   {range(0, 59, 1).map((item, index) => {
                     return (
@@ -224,9 +247,9 @@ export default function Strategy(props) {
               </FormControl>
               <FormControl size='small'>
                 <Select
-                  name='second'
-                  value={strategy.endTime.second}
-                  onChange={handleEndTime}
+                  name='strategySettings.endTime.second'
+                  value={endTime.second}
+                  onChange={handleChange}
                 >
                   {range(0, 59, 1).map((item, index) => {
                     return (
@@ -244,74 +267,15 @@ export default function Strategy(props) {
         {/* /////////////////////////// */}
         {/* //// NEXT DAY END TIME //// */}
         {/* /////////////////////////// */}
-        {strategy.tradeType === 'positional' &&
-          strategy.duration === 'STBT_BTST' && (
-            <Stack spacing={1}>
-              <Typography>Next day end time</Typography>
-              <Stack direction='row' spacing={1}>
-                <FormControl size='small'>
-                  <Select
-                    name='hour'
-                    value={strategy.nextDayEndTime.hour}
-                    onChange={handleNextDayEndTime}
-                  >
-                    {range(9, 15, 1).map((item, index) => {
-                      return (
-                        <MenuItem key={index} value={item}>
-                          {item}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                  <FormHelperText>HH</FormHelperText>
-                </FormControl>
-                <FormControl size='small'>
-                  <Select
-                    name='minute'
-                    value={strategy.nextDayEndTime.minute}
-                    onChange={handleNextDayEndTime}
-                  >
-                    {range(0, 59, 1).map((item, index) => {
-                      return (
-                        <MenuItem key={index} value={item}>
-                          {item}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                  <FormHelperText>MM</FormHelperText>
-                </FormControl>
-                <FormControl size='small'>
-                  <Select
-                    name='second'
-                    value={strategy.nextDayEndTime.second}
-                    onChange={handleNextDayEndTime}
-                  >
-                    {range(0, 59, 1).map((item, index) => {
-                      return (
-                        <MenuItem key={index} value={item}>
-                          {item}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                  <FormHelperText>SS</FormHelperText>
-                </FormControl>
-              </Stack>
-            </Stack>
-          )}
-        {/* ///////////////////////////////////////////// */}
-        {/* //// CHECK CONDITION NEXT DAY AFTER TIME //// */}
-        {/* ///////////////////////////////////////////// */}
-        {strategy.tradeType === 'positional' && (
+        {tradeType === 'positional' && duration === 'STBT_BTST' && (
           <Stack spacing={1}>
-            <Typography>Check condition next day after (time)</Typography>
+            <Typography>Next day end time</Typography>
             <Stack direction='row' spacing={1}>
               <FormControl size='small'>
                 <Select
-                  name='hour'
-                  value={strategy.checkConditionNextDayAfter.hour}
-                  onChange={handleCheckConditionNextDayAfter}
+                  name='strategySettings.nextDayEndTime.hour'
+                  value={nextDayEndTime.hour}
+                  onChange={handleChange}
                 >
                   {range(9, 15, 1).map((item, index) => {
                     return (
@@ -325,9 +289,9 @@ export default function Strategy(props) {
               </FormControl>
               <FormControl size='small'>
                 <Select
-                  name='minute'
-                  value={strategy.checkConditionNextDayAfter.minute}
-                  onChange={handleCheckConditionNextDayAfter}
+                  name='strategySettings.nextDayEndTime.minute'
+                  value={nextDayEndTime.minute}
+                  onChange={handleChange}
                 >
                   {range(0, 59, 1).map((item, index) => {
                     return (
@@ -341,9 +305,67 @@ export default function Strategy(props) {
               </FormControl>
               <FormControl size='small'>
                 <Select
-                  name='second'
-                  value={strategy.checkConditionNextDayAfter.second}
-                  onChange={handleCheckConditionNextDayAfter}
+                  name='strategySettings.nextDayEndTime.second'
+                  value={nextDayEndTime.second}
+                  onChange={handleChange}
+                >
+                  {range(0, 59, 1).map((item, index) => {
+                    return (
+                      <MenuItem key={index} value={item}>
+                        {item}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+                <FormHelperText>SS</FormHelperText>
+              </FormControl>
+            </Stack>
+          </Stack>
+        )}
+        {/* ///////////////////////////////////////////// */}
+        {/* //// CHECK CONDITION NEXT DAY AFTER TIME //// */}
+        {/* ///////////////////////////////////////////// */}
+        {tradeType === 'positional' && (
+          <Stack spacing={1}>
+            <Typography>Check condition next day after (time)</Typography>
+            <Stack direction='row' spacing={1}>
+              <FormControl size='small'>
+                <Select
+                  name='strategySettings.checkConditionNextDayAfter.hour'
+                  value={checkConditionNextDayAfter.hour}
+                  onChange={handleChange}
+                >
+                  {range(9, 15, 1).map((item, index) => {
+                    return (
+                      <MenuItem key={index} value={item}>
+                        {item}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+                <FormHelperText>HH</FormHelperText>
+              </FormControl>
+              <FormControl size='small'>
+                <Select
+                  name='strategySettings.checkConditionNextDayAfter.minute'
+                  value={checkConditionNextDayAfter.minute}
+                  onChange={handleChange}
+                >
+                  {range(0, 59, 1).map((item, index) => {
+                    return (
+                      <MenuItem key={index} value={item}>
+                        {item}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+                <FormHelperText>MM</FormHelperText>
+              </FormControl>
+              <FormControl size='small'>
+                <Select
+                  name='strategySettings.checkConditionNextDayAfter.second'
+                  value={checkConditionNextDayAfter.second}
+                  onChange={handleChange}
                 >
                   {range(0, 59, 1).map((item, index) => {
                     return (

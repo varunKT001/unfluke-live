@@ -10,8 +10,9 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../api/user';
+import { Navigate } from 'react-router-dom';
 
 function Copyright(props) {
   return (
@@ -40,6 +41,7 @@ const initialCredentials = {
 
 export default function SignIn() {
   const dispatch = useDispatch();
+  const user = useSelector((store) => store.user);
   const [credentials, setCredentials] = React.useState(initialCredentials);
 
   const handleCredentials = (e) => {
@@ -53,6 +55,10 @@ export default function SignIn() {
   const handleSubmit = () => {
     dispatch(login(credentials));
   };
+
+  if (user.data) {
+    return <Navigate to='/' />;
+  }
 
   return (
     <ThemeProvider theme={theme}>

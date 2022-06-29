@@ -8,14 +8,13 @@ export default function MTM({
   updateMTMTarget,
   updateMTMStopLoss,
   updateMTMTrailing,
-  deleteStateProp,
   strategy,
 }) {
   return (
     <Stack direction='row' spacing={4}>
       <MTMTarget {...{ updateMTMTarget, strategy }} />
       <MTMStopLoss {...{ updateMTMStopLoss, strategy }} />
-      <MTMTrailing {...{ updateMTMTrailing, deleteStateProp, strategy }} />
+      <MTMTrailing {...{ updateMTMTrailing, strategy }} />
     </Stack>
   );
 }

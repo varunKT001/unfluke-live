@@ -11,34 +11,13 @@ import {
   MenuItem,
 } from '@mui/material';
 
-export default function AdvancedSettings({
-  updateAdvancedSettings,
-  deleteStateProp,
-  strategy,
-}) {
+export default function AdvancedSettings({ updateAdvancedSettings, strategy }) {
   const dispatch = useDispatch();
   const { advancedSettings } = useSelector((store) => store[strategy]);
 
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
-    if (name.split('.')[1] === 'type') {
-      if (value === 'market_M') {
-        dispatch(
-          deleteStateProp(`advancedSettings.${name.split('.')[0]}.options`)
-        );
-      } else {
-        const payload = {
-          name: `${name.split('.')[0]}.options`,
-          value: {
-            triggerAndPriceLimitBufferIn: 'percentage',
-            triggerAndPriceLimitBufferValue: '3',
-            [`${name.split('.')[0]}WithMarketOrderIfOpenForN`]: '10',
-          },
-        };
-        dispatch(updateAdvancedSettings(payload));
-      }
-    }
     if (
       (name.split('.')[2] === 'triggerAndPriceLimitBufferValue' ||
         name.split('.')[2] ===

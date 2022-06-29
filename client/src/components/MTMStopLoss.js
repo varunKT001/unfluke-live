@@ -18,22 +18,19 @@ export default function MTMStopLoss({ updateMTMStopLoss, strategy }) {
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
-    if (name === 'fixedStopLoss' && value === 'None') {
-      const payload = { name: 'value', value: 0 };
-      dispatch(updateMTMStopLoss(payload));
-    }
     if (name === 'value' && value < 0) {
       value = 0;
     }
-    const payload = {
-      name,
-      value,
-    };
+    const payload = { name, value };
     dispatch(updateMTMStopLoss(payload));
   }
   function handleMTMFixedStoploss(event, value) {
     const name = 'fixedStopLoss';
     if (value !== null) {
+      if (value === 'None') {
+        const payload = { name: 'value', value: 0 };
+        dispatch(updateMTMStopLoss(payload));
+      }
       const payload = { name, value };
       dispatch(updateMTMStopLoss(payload));
     }

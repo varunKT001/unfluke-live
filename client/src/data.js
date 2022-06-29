@@ -4,20 +4,20 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import RadarIcon from '@mui/icons-material/Radar';
 
 export const MiniDrawerList = [
-  { name: 'Create strategy', icon: <AddIcon />, url: '/dashboard' },
+  { name: 'Create strategy', icon: <AddIcon />, url: '/' },
   {
     name: 'My strategies',
     icon: <BorderAllIcon />,
-    url: '/dashboard/my-strategies',
+    url: '/my-strategies',
   },
   {
     name: 'Orders',
     icon: <ShoppingBagIcon />,
-    url: '/dashboard/orders',
+    url: '/orders',
   },
   {
     name: 'Positions',
     icon: <RadarIcon />,
-    url: '/dashboard/Positions',
+    url: '/Positions',
   },
 ];
