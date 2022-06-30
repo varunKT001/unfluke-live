@@ -1,24 +1,20 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import {
-  getStrategiesFromLocalStorage,
-  toggleStrategyStatusInLocalStorage,
-  deleteStrategiesFromLocalStorage,
-  updateStrategyInLocalStorage,
-  saveStrategyToLocalStorage,
-} from '../utils/localStorage';
+import { deepCopy } from '../utils/miscUtils';
 import { clearValues as clearValuesStrategyOne } from '../redux/slices/strategyOneSlice';
 import { clearValues as clearValuesStrategyTwo } from '../redux/slices/strategyTwoSlice';
+import Axios from 'axios';
 
 export const addStrategy = createAsyncThunk(
   'strategies/addStrategy',
-  async ({ isEditing, editStrategyId, ...strategy }, thunkAPI) => {
+  async (strategy, thunkAPI) => {
     try {
-      const response = saveStrategyToLocalStorage(strategy);
+      const body = { user: thunkAPI.getState().user.data.id, ...strategy };
+      const response = await Axios.post('/strategy', body);
       thunkAPI.dispatch(clearValuesStrategyOne());
       thunkAPI.dispatch(clearValuesStrategyTwo());
-      return response.message;
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error.response.data.message);
     }
   }
 );
@@ -26,10 +22,10 @@ export const fetchStrategies = createAsyncThunk(
   'strategies/fetchStrategies',
   async (_, thunkAPI) => {
     try {
-      const response = getStrategiesFromLocalStorage();
-      return response;
+      const response = await Axios.get('/strategy');
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error.response.data.message);
     }
   }
 );
@@ -37,34 +33,40 @@ export const deleteStrategies = createAsyncThunk(
   'strategies/deleteStrategies',
   async (strategyIdsArray, thunkAPI) => {
     try {
-      const response = deleteStrategiesFromLocalStorage(strategyIdsArray);
+      const response = await Axios.delete('/strategy', {
+        data: strategyIdsArray,
+      });
       thunkAPI.dispatch(fetchStrategies());
-      return response.message;
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error.response.data.message);
     }
   }
 );
 export const updateStrategy = createAsyncThunk(
-  'strategies/deleteStrategies',
+  'strategies/updateStrategy',
   async ({ id, state }, thunkAPI) => {
     try {
-      const response = updateStrategyInLocalStorage({ id, state });
+      const response = await Axios.patch('/strategy', { id, state });
       thunkAPI.dispatch(clearValuesStrategyOne());
       thunkAPI.dispatch(clearValuesStrategyTwo());
-      return response.message;
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error.response.data.message);
     }
   }
 );
 export const toggleStrategyStatus = createAsyncThunk(
-  'strategies/deleteStrategies',
+  'strategies/toggleStrategyStatus',
   async (id, thunkAPI) => {
     try {
-      const response = toggleStrategyStatusInLocalStorage(id);
+      const state = deepCopy(
+        thunkAPI.getState().strategies.strategies.find((s) => s._id === id)
+      );
+      state.status = state.status === 'active' ? 'disabled' : 'active';
+      const response = await Axios.patch('/strategy', { id, state });
       thunkAPI.dispatch(fetchStrategies());
-      return response.message;
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }

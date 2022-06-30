@@ -189,9 +189,9 @@ export default function EnhancedTable() {
                 .sort(getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
+                  const isItemSelected = isSelected(row._id);
                   const labelId = `enhanced-table-checkbox-${index}`;
-                  const { id, ...rowWithoutId } = row;
+                  const { _id, ...rowWithoutId } = row;
 
                   return (
                     <TableRow
@@ -206,7 +206,7 @@ export default function EnhancedTable() {
                         <Checkbox
                           color='primary'
                           checked={isItemSelected}
-                          onClick={(event) => handleClick(event, row.id)}
+                          onClick={(event) => handleClick(event, row._id)}
                           inputProps={{
                             'aria-labelledby': labelId,
                           }}
@@ -287,13 +287,13 @@ export default function EnhancedTable() {
                               row.strategyType === 'strategy_one'
                                 ? dispatch(
                                     setEditStrategyOne({
-                                      editStrategyId: id,
+                                      editStrategyId: _id,
                                       ...rowWithoutId,
                                     })
                                   )
                                 : dispatch(
                                     setEditStrategyTwo({
-                                      editStrategyId: id,
+                                      editStrategyId: _id,
                                       ...rowWithoutId,
                                     })
                                   )
@@ -303,7 +303,7 @@ export default function EnhancedTable() {
                           </MenuItem>
                           <MenuItem
                             value='start_stop'
-                            onClick={() => dispatch(toggleStrategyStatus(id))}
+                            onClick={() => dispatch(toggleStrategyStatus(_id))}
                           >
                             Start/Stop
                           </MenuItem>

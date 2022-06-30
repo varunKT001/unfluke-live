@@ -15,6 +15,7 @@ const app = express();
 
 // requiring routers
 const userRouter = require('./routes/userRouter');
+const strategyRouter = require('./routes/strategyRouter');
 
 // requiring middlewares
 const errorMiddleware = require('./middleware/Error');
@@ -36,6 +37,7 @@ app.use(cookieParser());
 
 // using routers
 app.use('/api/user', userRouter);
+app.use('/api/strategy', strategyRouter);
 
 // using other middlewares
 app.use(errorMiddleware);

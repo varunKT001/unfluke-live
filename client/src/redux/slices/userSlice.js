@@ -27,7 +27,6 @@ const userSlice = createSlice({
     //// Register ////
     //////////////////
     [register.pending]: (state) => {
-      console.log(state);
       state.isLoading = true;
     },
     [register.fulfilled]: (state, action) => {

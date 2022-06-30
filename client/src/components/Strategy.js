@@ -194,7 +194,7 @@ export default function Strategy(props) {
             <Slider
               name='strategySettings.daysBeforeExpiry'
               defaultValue={4}
-              value={daysBeforeExpiry}
+              value={Number(daysBeforeExpiry)}
               min={0}
               max={4}
               step={1}

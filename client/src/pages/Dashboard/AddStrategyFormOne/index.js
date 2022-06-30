@@ -39,11 +39,11 @@ export default function AddStrategyFormOne(props) {
   }
 
   function handleSubmit() {
+    const { isEditing, editStrategyId, ...newState } = strategyOne;
     if (isEditing) {
-      const { isEditing, editStrategyId, ...newState } = strategyOne;
       return dispatch(updateStrategy({ id: editStrategyId, state: newState }));
     }
-    dispatch(addStrategy(strategyOne));
+    dispatch(addStrategy(newState));
   }
 
   return (

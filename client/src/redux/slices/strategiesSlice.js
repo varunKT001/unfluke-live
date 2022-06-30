@@ -4,6 +4,7 @@ import {
   deleteStrategies,
   toggleStrategyStatus,
   addStrategy,
+  updateStrategy,
 } from '../../api/strategies';
 
 const initialState = {
@@ -23,9 +24,23 @@ const strategiesSlice = createSlice({
     },
     [addStrategy.fulfilled]: (state, { payload }) => {
       state.isLoading = false;
-      alert(payload);
+      alert('Strategy created');
     },
     [addStrategy.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+      alert(payload);
+    },
+    ////////////////
+    //// UPDATE ////
+    ////////////////
+    [updateStrategy.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [updateStrategy.fulfilled]: (state, { payload }) => {
+      state.isLoading = false;
+      alert('Strategy edited');
+    },
+    [updateStrategy.rejected]: (state, { payload }) => {
       state.isLoading = false;
       alert(payload);
     },
@@ -37,7 +52,7 @@ const strategiesSlice = createSlice({
     },
     [fetchStrategies.fulfilled]: (state, { payload }) => {
       state.isLoading = false;
-      state.strategies = payload;
+      state.strategies = payload.data;
     },
     [fetchStrategies.rejected]: (state, { payload }) => {
       state.isLoading = false;
@@ -51,7 +66,7 @@ const strategiesSlice = createSlice({
     },
     [deleteStrategies.fulfilled]: (state, { payload }) => {
       state.isLoading = false;
-      alert(payload);
+      alert('Strategy deleted');
     },
     [deleteStrategies.rejected]: (state, { payload }) => {
       state.isLoading = false;
@@ -65,7 +80,9 @@ const strategiesSlice = createSlice({
     },
     [toggleStrategyStatus.fulfilled]: (state, { payload }) => {
       state.isLoading = false;
-      alert(payload);
+      alert(
+        `Strategy ${payload.data.status === 'active' ? 'disabled' : 'active'}`
+      );
     },
     [toggleStrategyStatus.rejected]: (state, { payload }) => {
       state.isLoading = false;
