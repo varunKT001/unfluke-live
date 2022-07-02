@@ -13,7 +13,7 @@ const adminModel = mongoose.Schema({
   totp_secret: {
     type: String,
   },
-  apikey: {
+  api_key: {
     type: String,
   },
   secret: {

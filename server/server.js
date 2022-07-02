@@ -1,6 +1,9 @@
 // load env-vars
 require('dotenv').config();
 
+// load ticker
+require('./subscribe')();
+
 // requiring dependencies
 const path = require('path');
 const express = require('express');
