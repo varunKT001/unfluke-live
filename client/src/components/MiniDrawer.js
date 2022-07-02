@@ -138,6 +138,9 @@ export default function MiniDrawer({ children }) {
             </Typography>
             <SimpleMenu sx={{ color: 'white' }} label={user.data.name}>
               <MenuItem>Profile</MenuItem>
+              <MenuItem component={Link} to='/broker-setup'>
+                Broker setup
+              </MenuItem>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </SimpleMenu>
           </Box>

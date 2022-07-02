@@ -12,6 +12,11 @@ import {
   Dashboard,
   SharedLayout,
 } from './pages/Dashboard';
+import {
+  BrokerSetup,
+  Zerodha,
+  BrokerSharedLayout,
+} from './pages/Dashboard/BrokerSetup';
 
 function App() {
   const dispatch = useDispatch();
@@ -40,6 +45,10 @@ function App() {
           <Route path='my-strategies' element={<MyStrategies />} />
           <Route path='orders' element={<Orders />} />
           <Route path='positions' element={<Positions />} />
+          <Route path='broker-setup' element={<BrokerSharedLayout />}>
+            <Route index element={<BrokerSetup />} />
+            <Route path='zerodha' element={<Zerodha />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

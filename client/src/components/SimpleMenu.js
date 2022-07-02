@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
-export default function BasicMenu({ children, label, sx }) {
+export default function BasicMenu({ children, label, sx, fullWidth, variant }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const open = Boolean(anchorEl);
@@ -17,15 +17,16 @@ export default function BasicMenu({ children, label, sx }) {
   };
 
   return (
-    <div>
+    <>
       <Button
         id='basic-button'
-        variant='outlined'
+        variant={variant || 'outlined'}
         endIcon={<KeyboardArrowDownIcon />}
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup='true'
         aria-expanded={open ? 'true' : undefined}
         sx={sx}
+        fullWidth={fullWidth}
         onClick={handleClick}
       >
         {label}
@@ -41,6 +42,6 @@ export default function BasicMenu({ children, label, sx }) {
       >
         {children}
       </Menu>
-    </div>
+    </>
   );
 }

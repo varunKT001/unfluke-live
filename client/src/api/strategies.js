@@ -6,12 +6,13 @@ import Axios from 'axios';
 
 export const addStrategy = createAsyncThunk(
   'strategies/addStrategy',
-  async (strategy, thunkAPI) => {
+  async ({ strategy, navigate }, thunkAPI) => {
     try {
       const body = { user: thunkAPI.getState().user.data.id, ...strategy };
       const response = await Axios.post('/strategy', body);
       thunkAPI.dispatch(clearValuesStrategyOne());
       thunkAPI.dispatch(clearValuesStrategyTwo());
+      navigate('/');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.message);
@@ -45,11 +46,12 @@ export const deleteStrategies = createAsyncThunk(
 );
 export const updateStrategy = createAsyncThunk(
   'strategies/updateStrategy',
-  async ({ id, state }, thunkAPI) => {
+  async ({ id, state, navigate }, thunkAPI) => {
     try {
       const response = await Axios.patch('/strategy', { id, state });
       thunkAPI.dispatch(clearValuesStrategyOne());
       thunkAPI.dispatch(clearValuesStrategyTwo());
+      navigate('/');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data.message);

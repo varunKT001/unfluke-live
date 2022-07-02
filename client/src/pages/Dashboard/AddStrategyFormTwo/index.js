@@ -3,6 +3,8 @@ import { Stack, TextField, Divider, Button } from '@mui/material';
 import { Positions } from './components';
 import { MTM, Strategy, AdvancedSettings } from '../../../components';
 import { useDispatch, useSelector } from 'react-redux';
+import { addStrategy, updateStrategy } from '../../../api/strategies';
+import { useNavigate } from 'react-router-dom';
 import {
   onChange,
   updateMTMTarget,
@@ -10,15 +12,13 @@ import {
   updateMTMTrailing,
   updateAdvancedSettings,
 } from '../../../redux/slices/strategyTwoSlice';
-import { addStrategy, updateStrategy } from '../../../api/strategies';
 
 export default function AddStrategyFormTwo(props) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const strategyTwo = useSelector((store) => store.strategyTwo);
   const {
     name,
-    isEditing,
-    editStrategyId,
     strategySettings: {
       underlying,
       tradeType,
@@ -41,9 +41,11 @@ export default function AddStrategyFormTwo(props) {
   function handleSubmit() {
     const { isEditing, editStrategyId, ...newState } = strategyTwo;
     if (isEditing) {
-      return dispatch(updateStrategy({ id: editStrategyId, state: newState }));
+      return dispatch(
+        updateStrategy({ id: editStrategyId, state: newState, navigate })
+      );
     }
-    dispatch(addStrategy(newState));
+    dispatch(addStrategy({ strategy: newState, navigate }));
   }
 
   return (
