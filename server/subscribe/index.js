@@ -1,9 +1,11 @@
+const Admin = require('../models/adminModel');
 const KiteTicker = require('kiteconnect').KiteTicker;
 
-function init() {
+async function init() {
+  const { api_key, access_token } = await Admin.findOne();
   const ticker = new KiteTicker({
-    api_key: process.env.ZERODHA_API_KEY,
-    access_token: process.env.ZERODHA_ACCESS_TOKEN,
+    api_key,
+    access_token,
   });
 
   ticker.connect();

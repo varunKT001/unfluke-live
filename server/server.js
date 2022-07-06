@@ -2,7 +2,10 @@
 require('dotenv').config();
 
 // load ticker
-require('./subscribe')();
+(async function () {
+  await require('./scripts').updateAdminAccessToken();
+  require('./subscribe')();
+})();
 
 // requiring dependencies
 const path = require('path');
