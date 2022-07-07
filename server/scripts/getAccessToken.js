@@ -21,18 +21,22 @@ async function getAccessToken(request_token, user) {
 
 async function init(user) {
   try {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
     const loginUrl = `${process.env.ZERODHA_LOGIN_URL}${user.api_key}`;
-    await page.goto(loginUrl, { waitUntil: 'networkidle0' });
+    await page.goto(loginUrl);
+    await page.waitForSelector('input[id=userid]');
+    await page.waitForSelector('input[id=password]');
+    await page.waitForSelector('button[type=submit]');
     await page.type('input[id=userid]', user.userID);
     await page.type('input[id=password]', user.password);
     await page.click('button[type=submit]');
-    await page.waitForNetworkIdle();
+    await page.waitForSelector('input[id=pin]');
+    await page.waitForSelector('button[type=submit]');
     await page.type('input[id=pin]', user.pin);
     await Promise.all([
       page.click('button[type=submit]'),
-      page.waitForNavigation(),
+      page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
     ]);
     const page_url = await page.url();
     await browser.close();

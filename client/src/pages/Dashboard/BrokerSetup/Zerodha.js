@@ -71,7 +71,7 @@ export default function Zerodha() {
           {/* //// AUTH TYPE //// */}
           {/* /////////////////// */}
           <Stack spacing={1} sx={{ minWidth: '35%', maxWidth: '50%' }}>
-            <Typography>Password</Typography>
+            <Typography>Auth Type</Typography>
             <FormControl size='small'>
               <Select
                 name='auth_type'

@@ -1,11 +1,8 @@
 // load env-vars
 require('dotenv').config();
 
-// load ticker
-(async function () {
-  await require('./scripts').updateAdminAccessToken();
-  require('./subscribe')();
-})();
+// load cron
+require('./scripts')();
 
 // requiring dependencies
 const path = require('path');
