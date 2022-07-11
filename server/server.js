@@ -10,9 +10,6 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
-// require db configs
-const connectToDb = require('./config/db');
-
 // initialize express
 const app = express();
 
@@ -32,7 +29,8 @@ process.on('uncaughtException', (err) => {
 });
 
 // connect to db
-connectToDb();
+require('./config/dbLocal');
+require('./config/dbCloud');
 
 // using middlewares
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));

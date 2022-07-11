@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
+const mongoose_local = require('../config/dbLocal');
 
 const userModel = mongoose.Schema(
   {
@@ -58,4 +59,4 @@ userModel.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('User', userModel);
+module.exports = mongoose_local.model('User', userModel);

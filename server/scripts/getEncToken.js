@@ -5,7 +5,6 @@ async function getEncToken(user) {
   const body = { userID, password, auth_type, totp_secret };
   try {
     const response = await Axios.post(process.env.YODHA_LOGIN_LAMBDA, body);
-    console.log(response.data.access_token);
     return response.data.access_token;
   } catch (error) {
     console.log(error);

@@ -3,6 +3,7 @@ const getAccessToken = require('./getAccessToken');
 const getEncToken = require('./getEncToken');
 const Admin = require('../models/adminModel');
 const UserBroker = require('../models/userBroker');
+const kiteTickerInit = require('../subscribe');
 
 async function updateAdminAccessToken() {
   const admin = await Admin.findOne();
@@ -30,7 +31,6 @@ async function init() {
     try {
       await updateAdminAccessToken();
       const users = await UserBroker.find();
-      const promises = [];
       for (let key in users) {
         if (users[key].api) {
           await updateUserAccessToken(users[key].user);
@@ -38,6 +38,7 @@ async function init() {
           await updateUserEncToken(users[key].user);
         }
       }
+      kiteTickerInit();
     } catch (error) {
       console.log(error);
     }

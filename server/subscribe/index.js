@@ -1,8 +1,15 @@
-const Admin = require('../models/adminModel');
 const KiteTicker = require('kiteconnect').KiteTicker;
+const Admin = require('../models/adminModel');
+const SimpleStockNames = require('../models/simpleStockNames');
 
 async function init() {
   const { api_key, access_token } = await Admin.findOne();
+  const simpleStockNames = await SimpleStockNames.find({});
+
+  const instrument_tokens = simpleStockNames.map((name) => {
+    return parseInt(name.instrument_token);
+  });
+
   const ticker = new KiteTicker({
     api_key,
     access_token,
@@ -18,9 +25,8 @@ async function init() {
   }
 
   function subscribe() {
-    var items = [738561];
-    ticker.subscribe(items);
-    ticker.setMode(ticker.modeFull, items);
+    ticker.subscribe(instrument_tokens);
+    ticker.setMode(ticker.modeFull, instrument_tokens);
   }
 
   function onError(error) {

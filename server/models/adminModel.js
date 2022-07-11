@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoose_local = require('../config/dbLocal');
 
 const adminModel = mongoose.Schema({
   userID: {
@@ -30,4 +31,4 @@ const adminModel = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Admin', adminModel);
+module.exports = mongoose_local.model('Admin', adminModel);

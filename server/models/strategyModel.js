@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoose_local = require('../config/dbLocal');
 
 const strategyModel = mongoose.Schema({
   user: { type: mongoose.Types.ObjectId, ref: 'User' },
@@ -121,4 +122,4 @@ const strategyModel = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Strategy', strategyModel);
+module.exports = mongoose_local.model('Strategy', strategyModel);

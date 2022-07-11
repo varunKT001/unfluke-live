@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoose_local = require('../config/dbLocal');
 
 const userBrokerModel = mongoose.Schema({
   user: {
@@ -50,4 +51,4 @@ const userBrokerModel = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('UserBroker', userBrokerModel);
+module.exports = mongoose_local.model('UserBroker', userBrokerModel);
