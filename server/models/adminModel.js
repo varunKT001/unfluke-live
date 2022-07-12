@@ -31,4 +31,4 @@ const adminModel = mongoose.Schema({
   },
 });
 
-module.exports = mongoose_local.model('Admin', adminModel);
+module.exports = mongoose_local.model('AdminUnflukeLive', adminModel);

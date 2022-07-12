@@ -13,7 +13,7 @@ export default function LegsContainer() {
     >
       {legs.length > 0 &&
         legs.map((leg) => {
-          return <Leg key={leg.id} {...leg}></Leg>;
+          return <Leg key={leg.id || leg._id} {...leg}></Leg>;
         })}
     </Stack>
   );

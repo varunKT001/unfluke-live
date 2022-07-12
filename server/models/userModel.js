@@ -34,11 +34,6 @@ const userModel = mongoose.Schema(
   { timestamps: true }
 );
 
-// validation for phone numbers
-function isPhone(v) {
-  return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(v);
-}
-
 // checking for changed password
 userModel.pre('save', async function (next) {
   if (!this.isModified('password')) {
@@ -59,4 +54,4 @@ userModel.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose_local.model('User', userModel);
+module.exports = mongoose_local.model('UserUnflukeLive', userModel);

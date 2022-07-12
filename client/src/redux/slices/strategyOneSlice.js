@@ -93,15 +93,19 @@ const strategyOneSlice = createSlice({
       set(state, payload.name.split('.'), payload.value);
     },
     updateLeg: (state, action) => {
-      let leg = state.positions.legs.find(
-        (item) => item.id === action.payload.id
-      );
+      let leg = state.positions.legs.find((item) => {
+        if (item.id && item.id === action.payload.id) return true;
+        else if (item._id && item._id === action.payload.id) return true;
+        return false;
+      });
       set(leg, action.payload.name.split('.'), action.payload.value);
     },
     deleteLeg: (state, action) => {
-      state.positions.legs = state.positions.legs.filter(
-        (leg) => leg.id !== action.payload
-      );
+      state.positions.legs = state.positions.legs.filter((leg) => {
+        if (leg.id && leg.id === action.payload) return false;
+        else if (leg._id && leg._id === action.payload) return false;
+        return true;
+      });
     },
     updateMTMTarget: (state, action) => {
       set(

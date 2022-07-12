@@ -1,7 +1,7 @@
 const postgresClient = require('../config/dbPostgres');
 const SMA = require('technicalindicators').SMA;
 
-async function getIndicatorValues(database, table) {
+async function getSMA(database, table) {
   try {
     const client = await postgresClient(database);
 
@@ -22,4 +22,4 @@ async function getIndicatorValues(database, table) {
   }
 }
 
-module.exports = getIndicatorValues;
+module.exports = getSMA;

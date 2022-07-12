@@ -45,10 +45,20 @@ const strategyModel = mongoose.Schema({
         quantity: { type: String },
         tradeType: { type: String },
         timeFrame: { type: String },
-        indicator_1: { type: String },
-        operator: { type: String },
-        RHS: { type: String },
-        indicator_2: { type: String },
+        conditions: [
+          {
+            indicator_1: {
+              name: { type: String },
+              parameters: {},
+            },
+            operator: { type: String },
+            RHS: { type: String },
+            indicator_2: {
+              name: { type: String },
+              parameters: {},
+            },
+          },
+        ],
         legType: {
           type: { type: String },
           value: { type: String },

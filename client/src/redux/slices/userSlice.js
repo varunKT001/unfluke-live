@@ -19,9 +19,11 @@ const userSlice = createSlice({
     [login.fulfilled]: (state, action) => {
       state.isLoading = false;
       state.data = action.payload.data;
+      alert(`Logged in as ${action.payload.data.name}`);
     },
     [login.rejected]: (state, action) => {
       state.isLoading = false;
+      alert(action.payload);
     },
     //////////////////
     //// Register ////
@@ -32,9 +34,11 @@ const userSlice = createSlice({
     [register.fulfilled]: (state, action) => {
       state.isLoading = false;
       state.data = action.payload.data;
+      alert(`Registration successfull`);
     },
     [register.rejected]: (state, action) => {
       state.isLoading = false;
+      alert(action.payload);
     },
     ////////////////
     //// Logout ////
@@ -45,9 +49,11 @@ const userSlice = createSlice({
     [logout.fulfilled]: (state, action) => {
       state.isLoading = false;
       state.data = null;
+      alert(`Logged out`);
     },
     [logout.rejected]: (state, action) => {
       state.isLoading = false;
+      alert(action.payload);
     },
     //////////////
     //// Auth ////

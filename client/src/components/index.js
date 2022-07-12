@@ -8,6 +8,7 @@ import MTMTrailing from './MTMTrailing';
 import AdvancedSettings from './AdvancedSettings';
 import EnhancedTableHead from './EnhancedTableHead';
 import EnhancedTableToolbar from './EnhancedTableToolbar';
+import IndicatorParamsModal from './IndicatorParamsModal';
 
 export {
   MiniDrawer,
@@ -20,4 +21,5 @@ export {
   AdvancedSettings,
   EnhancedTableHead,
   EnhancedTableToolbar,
+  IndicatorParamsModal,
 };

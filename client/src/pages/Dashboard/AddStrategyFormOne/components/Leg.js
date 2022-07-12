@@ -50,7 +50,7 @@ export default function Leg(props) {
     let value = event.target.value;
     if (name === 'legType.type' && value !== 'leg') {
       const payload = {
-        id: props.id,
+        id: props._id || props.id,
         name: 'legType.value',
         value: getUserInput(
           capitalizeFirstLetter(value.split('_').join(' ')),
@@ -78,7 +78,7 @@ export default function Leg(props) {
       }
     }
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name,
       value,
     };
@@ -86,7 +86,7 @@ export default function Leg(props) {
   }
   function handleBuySell() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'buysell',
       value: props.buysell,
     };
@@ -99,7 +99,7 @@ export default function Leg(props) {
   }
   function handleTradeType() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'tradeType',
       value: props.tradeType,
     };
@@ -112,7 +112,7 @@ export default function Leg(props) {
   }
   function handleOptions() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'options',
       value: props.options,
     };
@@ -124,11 +124,11 @@ export default function Leg(props) {
     dispatch(updateLeg(payload));
   }
   function handleDelete() {
-    dispatch(deleteLeg(props.id));
+    dispatch(deleteLeg(props._id || props.id));
   }
   function handleInstrument() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'instrument',
       value: props.instrument,
     };

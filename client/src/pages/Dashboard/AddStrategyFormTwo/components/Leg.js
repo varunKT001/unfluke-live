@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { indicatorOptions } from '../../../../utils/constants';
+import { IndicatorParamsModal } from '../../../../components';
 import {
   updateLeg,
   deleteLeg,
@@ -34,22 +36,16 @@ const strikeOptions = [
   }),
 ];
 
-const maxEntriesOptions = [
-  { name: 'no_max_limit', value: 'No max limit' },
-  ...range(1, 20, 1).map((item) => {
-    return { name: item, value: item };
-  }),
-];
-
 export default function Leg(props) {
   const dispatch = useDispatch();
+  const [edit, setEdit] = useState(false);
 
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
     if (name === 'legType.type' && value !== 'leg') {
       const payload = {
-        id: props.id,
+        id: props._id || props.id,
         name: 'legType.value',
         value: getUserInput(
           capitalizeFirstLetter(value.split('_').join(' ')),
@@ -71,7 +67,7 @@ export default function Leg(props) {
       }
     }
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name,
       value,
     };
@@ -79,7 +75,7 @@ export default function Leg(props) {
   }
   function handleBuySell() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'buysell',
       value: props.buysell,
     };
@@ -92,7 +88,7 @@ export default function Leg(props) {
   }
   function handleTradeType() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'tradeType',
       value: props.tradeType,
     };
@@ -105,7 +101,7 @@ export default function Leg(props) {
   }
   function handleOptions() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'options',
       value: props.options,
     };
@@ -117,11 +113,11 @@ export default function Leg(props) {
     dispatch(updateLeg(payload));
   }
   function handleDelete() {
-    dispatch(deleteLeg(props.id));
+    dispatch(deleteLeg(props._id || props.id));
   }
   function handleInstrument() {
     const payload = {
-      id: props.id,
+      id: props._id || props.id,
       name: 'instrument',
       value: props.instrument,
     };
@@ -286,70 +282,124 @@ export default function Leg(props) {
         </Stack>
       </Stack>
       <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack spacing={2}>
+          {edit === true &&
+            props.conditions.map((condition, index) => {
+              return (
+                <Stack key={index} direction='row' spacing={2}>
+                  {/* /////////////////// */}
+                  {/* //// INDICATOR //// */}
+                  {/* /////////////////// */}
+                  <Stack direction='row' spacing={1}>
+                    <FormControl size='small'>
+                      <Select
+                        name={`conditions.${index}.indicator_1.name`}
+                        value={condition.indicator_1.name}
+                        onChange={handleChange}
+                      >
+                        {indicatorOptions.map((item, index) => {
+                          return (
+                            <MenuItem key={index} value={item.value}>
+                              {item.name}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </FormControl>
+                    <IndicatorParamsModal
+                      label='+'
+                      indicator={{
+                        type: 'indicator_1',
+                        name: condition.indicator_1.name,
+                        propertyName: `conditions.${index}.indicator_1.parameters`,
+                        onSave: handleChange,
+                      }}
+                    />
+                  </Stack>
+                  {/* ////////////////// */}
+                  {/* //// OPERATOR //// */}
+                  {/* ////////////////// */}
+                  <FormControl size='small'>
+                    <Select
+                      name={`conditions.${index}.operator`}
+                      value={condition.operator}
+                      onChange={handleChange}
+                    >
+                      <MenuItem value='banknifty'>Banknifty</MenuItem>
+                      <MenuItem value='nifty'>nifty</MenuItem>
+                    </Select>
+                  </FormControl>
+                  {/* ///////////// */}
+                  {/* //// RHS //// */}
+                  {/* ///////////// */}
+                  <FormControl size='small'>
+                    <Select
+                      name={`conditions.${index}.RHS`}
+                      value={condition.RHS}
+                      onChange={handleChange}
+                    >
+                      <MenuItem value='banknifty'>Banknifty</MenuItem>
+                      <MenuItem value='nifty'>nifty</MenuItem>
+                    </Select>
+                  </FormControl>
+                  {/* /////////////////// */}
+                  {/* //// INDICATOR //// */}
+                  {/* /////////////////// */}
+                  <Stack direction='row' spacing={1}>
+                    <FormControl size='small'>
+                      <Select
+                        name={`conditions.${index}.indicator_2.name`}
+                        value={condition.indicator_2.name}
+                        onChange={handleChange}
+                      >
+                        {indicatorOptions.map((item, index) => {
+                          return (
+                            <MenuItem key={index} value={item.value}>
+                              {item.name}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </FormControl>
+                    <IndicatorParamsModal
+                      label='+'
+                      indicator={{
+                        type: 'indicator_2',
+                        name: condition.indicator_2.name,
+                        propertyName: `conditions.${index}.indicator_2.parameters`,
+                        onSave: handleChange,
+                      }}
+                    />
+                  </Stack>
+                </Stack>
+              );
+            })}
+        </Stack>
         <Stack direction='row' spacing={2}>
-          {/* /////////////////// */}
-          {/* //// INDICATOR //// */}
-          {/* /////////////////// */}
-          <FormControl size='small'>
-            <Select
-              name='indicator_1'
-              value={props.indicator_1}
-              onChange={handleChange}
-            >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>nifty</MenuItem>
-            </Select>
-          </FormControl>
-          {/* ////////////////// */}
-          {/* //// OPERATOR //// */}
-          {/* ////////////////// */}
-          <FormControl size='small'>
-            <Select
-              name='operator'
-              value={props.operator}
-              onChange={handleChange}
-            >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>nifty</MenuItem>
-            </Select>
-          </FormControl>
-          {/* ///////////// */}
-          {/* //// RHS //// */}
-          {/* ///////////// */}
-          <FormControl size='small'>
-            <Select name='RHS' value={props.RHS} onChange={handleChange}>
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>nifty</MenuItem>
-            </Select>
-          </FormControl>
-          {/* /////////////////// */}
-          {/* //// INDICATOR //// */}
-          {/* /////////////////// */}
-          <FormControl size='small'>
-            <Select
-              name='indicator_2'
-              value={props.indicator_2}
-              onChange={handleChange}
-            >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>nifty</MenuItem>
-            </Select>
-          </FormControl>
           {/* ////////////////////// */}
           {/* //// INTSTRUMENTS //// */}
           {/* ////////////////////// */}
-          <Button
-            variant='outlined'
-            onClick={handleInstrument}
-            sx={{
-              maxWidth: '100px',
-              minWidth: '30px',
-            }}
-          >
-            {props.instrument}
-          </Button>
-        </Stack>
-        <Stack direction='row' spacing={2}>
+          <Stack spacing={1}>
+            <Button
+              variant='outlined'
+              onClick={handleInstrument}
+              sx={{
+                maxWidth: '100px',
+                minWidth: '30px',
+              }}
+            >
+              {props.instrument}
+            </Button>
+            {/* ////////////// */}
+            {/* //// EDIT //// */}
+            {/* ////////////// */}
+            <Button
+              variant={edit ? 'contained' : 'outlined'}
+              onClick={() => setEdit(!edit)}
+            >
+              edit
+            </Button>
+          </Stack>
           {/* //////////////// */}
           {/* //// DELETE //// */}
           {/* //////////////// */}

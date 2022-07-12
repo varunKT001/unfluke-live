@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { range, deepCopy } from '../../../../utils/miscUtils';
+import {
+  range,
+  deepCopy,
+  setDeepObjProp as set,
+} from '../../../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import { addLeg } from '../../../../redux/slices/strategyTwoSlice';
 import LegsContainer from './LegsContainer';
+import { IndicatorParamsModal } from '../../../../components';
 import { v4 } from 'uuid';
+import { indicatorOptions } from '../../../../utils/constants';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Stack,
   Typography,
@@ -14,6 +21,7 @@ import {
   ToggleButtonGroup,
   TextField,
   Button,
+  IconButton,
 } from '@mui/material';
 
 const initialPositions = {
@@ -26,10 +34,21 @@ const initialPositions = {
   quantity: 1,
   tradeType: 'MIS',
   timeFrame: '1',
-  indicator_1: 'banknifty',
+  conditions: [
+    {
+      indicator_1: { name: 'sma', parameters: {} },
+      operator: 'banknifty',
+      RHS: 'banknifty',
+      indicator_2: { name: 'sma', parameters: {} },
+    },
+  ],
+};
+
+const initialCondition = {
+  indicator_1: { name: 'sma', parameters: {} },
   operator: 'banknifty',
   RHS: 'banknifty',
-  indicator_2: 'banknifty',
+  indicator_2: { name: 'sma', parameters: {} },
 };
 
 const strikeOptions = [
@@ -47,18 +66,33 @@ const strikeOptions = [
 export default function Positions() {
   const dispatch = useDispatch();
   const { legs } = useSelector((store) => store.strategyTwo.positions);
-  const [positions, setPositions] = useState(initialPositions);
+  const [positions, setPositions] = useState(() => initialPositions);
 
-  function handleinstrument(event) {
-    const value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, instrument: value };
-    });
+  function handleAndOr(event, index) {
+    const name = event.target.dataset.name;
+    const propName = `conditions.${index}.logic`;
+    if (positions.conditions[index].logic) {
+      setPositions((prev) => {
+        set(prev, propName.split('.'), name);
+        return { ...prev };
+      });
+    } else {
+      setPositions((prev) => {
+        set(prev, propName.split('.'), name);
+        return {
+          ...prev,
+          conditions: [...prev.conditions, deepCopy(initialCondition)],
+        };
+      });
+    }
   }
-  function handleSegment(event) {
-    const value = event.target.value;
+  function handleDeleteRow(indexToBeDeleted) {
     setPositions((prev) => {
-      return { ...prev, segment: value };
+      const newConditions = prev.conditions.filter(
+        (item, index) => index !== indexToBeDeleted
+      );
+      delete newConditions[newConditions.length - 1].logic;
+      return { ...prev, conditions: [...newConditions] };
     });
   }
   function handleOptions(event, value) {
@@ -71,50 +105,17 @@ export default function Positions() {
       return { ...prev, buysell: value };
     });
   }
-  function handleStrike(event) {
-    const value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, strike: value };
-    });
-  }
-  function handleStrikeDetails(event) {
-    const value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, strikeDetails: value };
-    });
-  }
-  function handleQuantity(event) {
-    let value = event.target.value;
-    if (value < 0) {
-      value = 0;
-    }
-    setPositions((prev) => {
-      return { ...prev, quantity: value };
-    });
-  }
-  function handleTimeFrame(event) {
-    let value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, timeFrame: value };
-    });
-  }
-  function handleIndicator(event) {
+  function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
+
+    if (name === 'quantity' && parseInt(value) < 0) {
+      value = 0;
+    }
+
     setPositions((prev) => {
-      return { ...prev, [name]: value };
-    });
-  }
-  function handleOperator(event) {
-    let value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, operator: value };
-    });
-  }
-  function handleRHS(event) {
-    let value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, RHS: value };
+      set(prev, name.split('.'), value);
+      return { ...prev };
     });
   }
   function handleAddLeg() {
@@ -145,7 +146,7 @@ export default function Positions() {
             <Select
               name='instrument'
               value={positions.instrument}
-              onChange={handleinstrument}
+              onChange={handleChange}
             >
               <MenuItem value='banknifty'>Banknifty</MenuItem>
               <MenuItem value='nifty'>Nifty</MenuItem>
@@ -161,7 +162,7 @@ export default function Positions() {
             <Select
               name='segment'
               value={positions.segment}
-              onChange={handleSegment}
+              onChange={handleChange}
             >
               <MenuItem value='options'>Options</MenuItem>
               <MenuItem value='futures'>Futures</MenuItem>
@@ -215,7 +216,7 @@ export default function Positions() {
               <Select
                 name='strike'
                 value={positions.strike}
-                onChange={handleStrike}
+                onChange={handleChange}
               >
                 {strikeOptions.map((item, index) => {
                   return (
@@ -238,7 +239,7 @@ export default function Positions() {
               <Select
                 name='strikeDetails'
                 value={positions.strikeDetails}
-                onChange={handleStrikeDetails}
+                onChange={handleChange}
               >
                 {strikeOptions.map((item, index) => {
                   return (
@@ -266,7 +267,7 @@ export default function Positions() {
             type='number'
             name='quantity'
             value={positions.quantity}
-            onChange={handleQuantity}
+            onChange={handleChange}
           />
         </Stack>
         {/* /////////////////// */}
@@ -283,7 +284,7 @@ export default function Positions() {
             <Select
               name='timeFrame'
               value={positions.timeFrame}
-              onChange={handleTimeFrame}
+              onChange={handleChange}
             >
               <MenuItem value='1'>1 min</MenuItem>
               <MenuItem value='2'>2 min</MenuItem>
@@ -297,76 +298,144 @@ export default function Positions() {
           </FormControl>
         </Stack>
       </Stack>
-      <Stack direction='row' spacing={4}>
-        {/* /////////////////// */}
-        {/* //// INDICATOR //// */}
-        {/* /////////////////// */}
-        <Stack spacing={1}>
-          <Typography>Indicator</Typography>
-          <FormControl size='small'>
-            <Select
-              name='indicator_1'
-              value={positions.indicator_1}
-              onChange={handleIndicator}
-            >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>Nifty</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-        {/* ////////////////// */}
-        {/* //// OPERATOR //// */}
-        {/* ////////////////// */}
-        <Stack spacing={1}>
-          <Typography>Operator</Typography>
-          <FormControl size='small'>
-            <Select
-              name='operator'
-              value={positions.operator}
-              onChange={handleOperator}
-            >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>Nifty</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-        {/* ///////////// */}
-        {/* //// RHS //// */}
-        {/* ///////////// */}
-        <Stack spacing={1}>
-          <Typography>Type</Typography>
-          <FormControl size='small'>
-            <Select name='RHS' value={positions.RHS} onChange={handleRHS}>
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>Nifty</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-        {/* /////////////////// */}
-        {/* //// INDICATOR //// */}
-        {/* /////////////////// */}
-        <Stack spacing={1}>
-          <Typography>Indicator</Typography>
-          <FormControl size='small'>
-            <Select
-              name='indicator_2'
-              value={positions.indicator_2}
-              onChange={handleIndicator}
-            >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>Nifty</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-        {/* ///////////////// */}
-        {/* //// ADD LEG //// */}
-        {/* ///////////////// */}
-        <Stack spacing={1} justifyContent='flex-end'>
-          <Button variant='contained' onClick={handleAddLeg}>
-            add leg
-          </Button>
-        </Stack>
-      </Stack>
+      {positions.conditions.map((condition, index) => {
+        return (
+          <Stack key={index} direction='row' spacing={4}>
+            {/* /////////////////// */}
+            {/* //// INDICATOR //// */}
+            {/* /////////////////// */}
+            <Stack spacing={1}>
+              <Typography>Indicator</Typography>
+              <Stack direction='row' spacing={1}>
+                <FormControl size='small'>
+                  <Select
+                    name={`conditions.${index}.indicator_1.name`}
+                    value={condition.indicator_1.name}
+                    onChange={handleChange}
+                  >
+                    {indicatorOptions.map((item, index) => {
+                      return (
+                        <MenuItem key={index} value={item.value}>
+                          {item.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+                <IndicatorParamsModal
+                  label='parameters'
+                  indicator={{
+                    type: 'indicator_1',
+                    name: condition.indicator_1.name,
+                    propertyName: `conditions.${index}.indicator_1.parameters`,
+                    onSave: handleChange,
+                  }}
+                />
+              </Stack>
+            </Stack>
+            {/* ////////////////// */}
+            {/* //// OPERATOR //// */}
+            {/* ////////////////// */}
+            <Stack spacing={1}>
+              <Typography>Operator</Typography>
+              <FormControl size='small'>
+                <Select
+                  name={`conditions.${index}.operator`}
+                  value={condition.operator}
+                  onChange={handleChange}
+                >
+                  <MenuItem value='banknifty'>Banknifty</MenuItem>
+                  <MenuItem value='nifty'>Nifty</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+            {/* ///////////// */}
+            {/* //// RHS //// */}
+            {/* ///////////// */}
+            <Stack spacing={1}>
+              <Typography>Type</Typography>
+              <FormControl size='small'>
+                <Select
+                  name={`conditions.${index}.RHS`}
+                  value={condition.RHS}
+                  onChange={handleChange}
+                >
+                  <MenuItem value='banknifty'>Banknifty</MenuItem>
+                  <MenuItem value='nifty'>Nifty</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+            {/* /////////////////// */}
+            {/* //// INDICATOR //// */}
+            {/* /////////////////// */}
+            <Stack spacing={1}>
+              <Typography>Indicator</Typography>
+              <Stack direction='row' spacing={1}>
+                <FormControl size='small'>
+                  <Select
+                    name={`conditions.${index}.indicator_2.name`}
+                    value={condition.indicator_2.name}
+                    onChange={handleChange}
+                  >
+                    {indicatorOptions.map((item, index) => {
+                      return (
+                        <MenuItem key={index} value={item.value}>
+                          {item.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+                <IndicatorParamsModal
+                  label='parameters'
+                  indicator={{
+                    type: 'indicator_2',
+                    name: condition.indicator_2.name,
+                    propertyName: `conditions.${index}.indicator_2.parameters`,
+                    onSave: handleChange,
+                  }}
+                />
+                <Stack direction='row' spacing={1} justifyContent='flex-end'>
+                  <Button
+                    data-name='AND'
+                    variant={
+                      condition.logic === 'AND' ? 'contained' : 'outlined'
+                    }
+                    onClick={(event) => handleAndOr(event, index)}
+                  >
+                    AND
+                  </Button>
+                  <Button
+                    data-name='OR'
+                    variant={
+                      condition.logic === 'OR' ? 'contained' : 'outlined'
+                    }
+                    onClick={(event) => handleAndOr(event, index)}
+                  >
+                    OR
+                  </Button>
+                  {index !== 0 && (
+                    <IconButton
+                      aria-label='delete'
+                      onClick={() => handleDeleteRow(index)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                  {index === positions.conditions.length - 1 && (
+                    <Button variant='contained' onClick={handleAddLeg}>
+                      add leg
+                    </Button>
+                  )}
+                </Stack>
+              </Stack>
+            </Stack>
+            {/* ///////////////// */}
+            {/* //// ADD LEG //// */}
+            {/* ///////////////// */}
+          </Stack>
+        );
+      })}
       {legs.length > 0 && <LegsContainer />}
     </Stack>
   );
