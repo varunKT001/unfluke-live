@@ -1,5 +1,7 @@
 const CatchAsyncErrors = require('../middleware/CatchAsyncErrors');
 const Strategy = require('../models/strategyModel');
+const Options = require('../models/optionsModel');
+const UnflukeLiveAdmin = require('../models/unflukeLiveAdminModel');
 
 // to add new strategy
 exports.addStrategy = CatchAsyncErrors(async (req, res, next) => {
@@ -41,5 +43,16 @@ exports.deleteStrategies = CatchAsyncErrors(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: 'Strategies deleted',
+  });
+});
+
+exports.sendInstrumentOptions = CatchAsyncErrors(async (req, res, next) => {
+  let options = await Options.find();
+  const { year } = await UnflukeLiveAdmin.findOne({});
+  options = options.map((option) => option.option.split(year)[0]);
+  const uniqueOptions = [...new Set([...options])];
+  return res.status(200).json({
+    success: true,
+    data: uniqueOptions,
   });
 });

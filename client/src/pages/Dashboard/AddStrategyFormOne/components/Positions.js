@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { range, deepCopy } from '../../../../utils/miscUtils';
+import {
+  range,
+  deepCopy,
+  setDeepObjProp as set,
+} from '../../../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addLeg,
@@ -20,14 +24,15 @@ import {
   FormControlLabel,
   Button,
 } from '@mui/material';
+import Axios from 'axios';
 
 const initialPositions = {
-  instrument: 'banknifty',
+  instrument: 'NIFTY',
   segment: 'options',
   options: 'CE',
   buysell: 'buy',
-  strike: 'ATM',
-  strikeDetails: 'ATM',
+  strike: 'based_on_atm',
+  strikeDetails: 'ATM_0',
   quantity: 1,
   tradeType: 'MIS',
   target: {
@@ -45,26 +50,25 @@ const initialPositions = {
       y: 0,
     },
   },
-  waitTime: { type: 'immediate', value: 0 },
-  reEntrySetting: { type: 're_none', maxEntries: 'no_max_limit' },
-  squareOff: 'square_off_leg',
+  waitTime: {
+    type: 'immediate',
+    value: 0,
+  },
   legOptions: {
     waitAndTrade: false,
-    reEntry: false,
     moveSlToCost: false,
-    tradeOnlyFirstEntry: false,
   },
 };
 
 const strikeOptions = [
   ...range(1, 5, 1)
     .map((item) => {
-      return { name: `ITM ${item}`, value: `ITM_${item}` };
+      return { name: `ITM (-${item} Strike}`, value: `ITM_${item}` };
     })
     .reverse(),
-  { name: 'ATM', value: 'ATM' },
+  { name: 'ATM (+0 Strike)', value: 'ATM_0' },
   ...range(1, 25, 1).map((item) => {
-    return { name: `OTM ${item}`, value: `OTM_${item}` };
+    return { name: `OTM (+${item} Strike)`, value: `OTM_${item}` };
   }),
 ];
 
@@ -73,21 +77,37 @@ export default function Positions() {
   const { legs, legOptions } = useSelector(
     (store) => store.strategyOne.positions
   );
+  const [instrumentOptions, setInstrumentOptions] = useState([]);
   const [positions, setPositions] = useState({
     ...initialPositions,
-    legOptions,
+    legOptions: { ...legOptions },
   });
 
-  function handleinstrument(event) {
-    const value = event.target.value;
+  async function fetchInstrumentOptions() {
+    try {
+      const resp = await Axios('/strategy/instruments');
+      setInstrumentOptions([...resp.data.data]);
+      setPositions((prev) => {
+        return { ...prev, instrument: resp.data.data[0] };
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  function handleChange(event) {
+    const name = event.target.name;
+    let value = event.target.value;
     setPositions((prev) => {
-      return { ...prev, instrument: value };
+      set(prev, name.split('.'), value);
+      return { ...prev };
     });
   }
-  function handleSegment(event) {
-    const value = event.target.value;
+  function handleCheckBox(event) {
+    const name = event.target.name;
+    let value = event.target.checked;
     setPositions((prev) => {
-      return { ...prev, segment: value };
+      set(prev, name.split('.'), value);
+      return { ...prev };
     });
   }
   function handleOptions(event, value) {
@@ -100,79 +120,9 @@ export default function Positions() {
       return { ...prev, buysell: value };
     });
   }
-  function handleStrike(event) {
-    const value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, strike: value };
-    });
-  }
-  function handleStrikeDetails(event) {
-    const value = event.target.value;
-    setPositions((prev) => {
-      return { ...prev, strikeDetails: value };
-    });
-  }
-  function handleQuantity(event) {
-    let value = event.target.value;
-    if (value < 0) {
-      value = 0;
-    }
-    setPositions((prev) => {
-      return { ...prev, quantity: value };
-    });
-  }
-  function handleWaitAndTrade(event) {
-    const value = event.target.checked;
-    setPositions((prev) => {
-      return {
-        ...prev,
-        legOptions: {
-          ...prev.legOptions,
-          waitAndTrade: value,
-          tradeOnlyFirstEntry: value
-            ? prev.legOptions.tradeOnlyFirstEntry
-            : false,
-        },
-      };
-    });
-  }
-  function handleReEntry(event) {
-    const value = event.target.checked;
-    setPositions((prev) => {
-      return {
-        ...prev,
-        legOptions: { ...prev.legOptions, reEntry: value },
-      };
-    });
-  }
-  function handleMoveSlToCost(event) {
-    const value = event.target.checked;
-    setPositions((prev) => {
-      return {
-        ...prev,
-        legOptions: { ...prev.legOptions, moveSlToCost: value },
-      };
-    });
-  }
-  function handleTradeOnlyFirstEntry(event) {
-    const value = event.target.checked;
-    setPositions((prev) => {
-      return {
-        ...prev,
-        legOptions: { ...prev.legOptions, tradeOnlyFirstEntry: value },
-      };
-    });
-  }
   function handleAddLeg() {
     let leg = deepCopy(positions);
-    leg = {
-      id: v4(),
-      ...leg,
-      legType: {
-        type: leg.segment === 'options' ? 'leg' : 'futures',
-        value: null,
-      },
-    };
+    leg = { id: v4(), ...leg };
     delete leg.legOptions;
     dispatch(addLeg(leg));
   }
@@ -186,6 +136,10 @@ export default function Positions() {
     positions.legOptions.tradeOnlyFirstEntry,
     positions.legOptions.reEntry,
   ]);
+
+  useEffect(() => {
+    fetchInstrumentOptions();
+  }, []);
 
   return (
     <Stack spacing={4}>
@@ -202,10 +156,11 @@ export default function Positions() {
             <Select
               name='instrument'
               value={positions.instrument}
-              onChange={handleinstrument}
+              onChange={handleChange}
             >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>Nifty</MenuItem>
+              {instrumentOptions.map((item, index) => {
+                return <MenuItem value={item}>{item}</MenuItem>;
+              })}
             </Select>
           </FormControl>
         </Stack>
@@ -218,7 +173,7 @@ export default function Positions() {
             <Select
               name='segment'
               value={positions.segment}
-              onChange={handleSegment}
+              onChange={handleChange}
             >
               <MenuItem value='options'>Options</MenuItem>
               <MenuItem value='futures'>Futures</MenuItem>
@@ -272,15 +227,10 @@ export default function Positions() {
               <Select
                 name='strike'
                 value={positions.strike}
-                onChange={handleStrike}
+                onChange={handleChange}
               >
-                {strikeOptions.map((item, index) => {
-                  return (
-                    <MenuItem key={index} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                })}
+                <MenuItem value='based_on_atm'>Based on ATM</MenuItem>
+                <MenuItem value='based_on_premium'>Based on premium</MenuItem>
               </Select>
             </FormControl>
           </Stack>
@@ -289,23 +239,38 @@ export default function Positions() {
         {/* //// STRIKE DETAILS //// */}
         {/* //////////////////////// */}
         {positions.segment === 'options' && (
-          <Stack spacing={1}>
+          <Stack
+            spacing={1}
+            sx={{
+              width: '125px',
+            }}
+          >
             <Typography>Strike Details</Typography>
-            <FormControl size='small'>
-              <Select
+            {positions.strike === 'based_on_atm' ? (
+              <FormControl size='small'>
+                <Select
+                  name='strikeDetails'
+                  value={positions.strikeDetails}
+                  onChange={handleChange}
+                >
+                  {strikeOptions.map((item, index) => {
+                    return (
+                      <MenuItem key={index} value={item.value}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            ) : (
+              <TextField
+                size='small'
+                type='number'
                 name='strikeDetails'
                 value={positions.strikeDetails}
-                onChange={handleStrikeDetails}
-              >
-                {strikeOptions.map((item, index) => {
-                  return (
-                    <MenuItem key={index} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
+                onChange={handleChange}
+              />
+            )}
           </Stack>
         )}
         {/* ////////////////// */}
@@ -323,7 +288,7 @@ export default function Positions() {
             type='number'
             name='quantity'
             value={positions.quantity}
-            onChange={handleQuantity}
+            onChange={handleChange}
           />
         </Stack>
         {/* ////////////////////// */}
@@ -333,42 +298,12 @@ export default function Positions() {
           <FormControlLabel
             control={
               <Checkbox
+                name='legOptions.waitAndTrade'
                 checked={positions.legOptions.waitAndTrade}
-                onChange={handleWaitAndTrade}
+                onChange={handleCheckBox}
               />
             }
             label='Wait & Trade'
-          />
-        </Stack>
-        {/* //////////////////////////////// */}
-        {/* //// TRADE ONLY FIRST ENTRY //// */}
-        {/* //////////////////////////////// */}
-        {positions.legOptions.waitAndTrade && (
-          <Stack spacing={1} justifyContent='flex-end'>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={positions.legOptions.tradeOnlyFirstEntry}
-                  onChange={handleTradeOnlyFirstEntry}
-                />
-              }
-              label='Trade only first entry'
-            />
-          </Stack>
-        )}
-
-        {/* ////////////////// */}
-        {/* //// RE-ENTRY //// */}
-        {/* ////////////////// */}
-        <Stack spacing={1} justifyContent='flex-end'>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={positions.legOptions.reEntry}
-                onChange={handleReEntry}
-              />
-            }
-            label='Re-entry'
           />
         </Stack>
         {/* ///////////////// */}
@@ -386,8 +321,9 @@ export default function Positions() {
           <FormControlLabel
             control={
               <Checkbox
+                name='legOptions.moveSlToCost'
                 checked={positions.legOptions.moveSlToCost}
-                onChange={handleMoveSlToCost}
+                onChange={handleCheckBox}
               />
             }
             label='Move SL to Cost'

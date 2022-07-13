@@ -53,16 +53,13 @@ const strategyModel = mongoose.Schema({
             },
             operator: { type: String },
             RHS: { type: String },
+            RHSValue: { type: String },
             indicator_2: {
               name: { type: String },
               parameters: {},
             },
           },
         ],
-        legType: {
-          type: { type: String },
-          value: { type: String },
-        },
         target: {
           type: { type: String },
           value: { type: String },
@@ -82,18 +79,11 @@ const strategyModel = mongoose.Schema({
           type: { type: String },
           value: { type: String },
         },
-        reEntrySettings: {
-          type: { type: String },
-          maxEntries: { type: String },
-        },
-        squareOff: { type: String },
       },
     ],
     legOptions: {
       waitAndTrade: { type: Boolean },
-      reEntry: { type: Boolean },
       moveSlToCost: { type: Boolean },
-      tradeOnlyFirstEntry: { type: Boolean },
     },
   },
   MTMTraget: {

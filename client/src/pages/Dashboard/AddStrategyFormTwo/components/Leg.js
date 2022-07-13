@@ -6,11 +6,7 @@ import {
   updateLeg,
   deleteLeg,
 } from '../../../../redux/slices/strategyTwoSlice';
-import {
-  range,
-  capitalizeFirstLetter,
-  getUserInput,
-} from '../../../../utils/miscUtils';
+import { range } from '../../../../utils/miscUtils';
 import {
   Stack,
   Button,
@@ -27,12 +23,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 const strikeOptions = [
   ...range(1, 5, 1)
     .map((item) => {
-      return { name: `ITM ${item}`, value: `ITM_${item}` };
+      return { name: `ITM (-${item} Strike}`, value: `ITM_${item}` };
     })
     .reverse(),
-  { name: 'ATM', value: 'ATM' },
+  { name: 'ATM (+0 Strike)', value: 'ATM_0' },
   ...range(1, 25, 1).map((item) => {
-    return { name: `OTM ${item}`, value: `OTM_${item}` };
+    return { name: `OTM (+${item} Strike)`, value: `OTM_${item}` };
   }),
 ];
 
@@ -43,29 +39,17 @@ export default function Leg(props) {
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
-    if (name === 'legType.type' && value !== 'leg') {
-      const payload = {
-        id: props._id || props.id,
-        name: 'legType.value',
-        value: getUserInput(
-          capitalizeFirstLetter(value.split('_').join(' ')),
-          /^\d+$/,
-          'Please input a number',
-          0
-        ),
-      };
-      dispatch(updateLeg(payload));
-    }
-    if (name === 'quantity') {
+
+    if (
+      name.split('.')[0] === 'quantity' ||
+      (name.split('.')[0] === 'strikeDetails' &&
+        props.strike === 'based_on_premium')
+    ) {
       if (value < 0) {
         value = 0;
       }
     }
-    if (name.split('.')[0] === 'legType') {
-      if (value < 0) {
-        value = 0;
-      }
-    }
+
     const payload = {
       id: props._id || props.id,
       name,
@@ -115,24 +99,12 @@ export default function Leg(props) {
   function handleDelete() {
     dispatch(deleteLeg(props._id || props.id));
   }
-  function handleInstrument() {
-    const payload = {
-      id: props._id || props.id,
-      name: 'instrument',
-      value: props.instrument,
-    };
-    if (props.instrument === 'banknifty') {
-      payload.value = 'nifty';
-    } else {
-      payload.value = 'banknifty';
-    }
-    dispatch(updateLeg(payload));
-  }
 
   return (
     <Stack
       direction='row'
       p={2}
+      spacing={2}
       justifyContent='space-between'
       alignItems='center'
     >
@@ -167,51 +139,52 @@ export default function Leg(props) {
         >
           {props.tradeType}
         </Button>
-        {/* ////////////////// */}
-        {/* //// LEG TYPE //// */}
-        {/* ////////////////// */}
-        {props.segment === 'options' && (
-          <FormControl size='small'>
-            <Select
-              name='legType.type'
-              value={props.legType.type}
-              onChange={handleChange}
-            >
-              <MenuItem value='leg'>Leg</MenuItem>
-              <MenuItem value='premium_close_to'>Premium close to</MenuItem>
-              <MenuItem value='premium_higher_than'>Premium &gt; than</MenuItem>
-              <MenuItem value='premium_lower_than'>Premium &lt; than</MenuItem>
-            </Select>
-          </FormControl>
-        )}
         {/* //////////////// */}
         {/* //// STRIKE //// */}
         {/* //////////////// */}
-        {props.segment === 'options' && props.legType.type === 'leg' && (
+        {props.segment === 'options' && (
           <FormControl size='small'>
             <Select name='strike' value={props.strike} onChange={handleChange}>
-              {strikeOptions.map((item, index) => {
-                return (
-                  <MenuItem key={index} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
+              <MenuItem value='based_on_atm'>Based on ATM</MenuItem>
+              <MenuItem value='based_on_premium'>Based on premium</MenuItem>
             </Select>
           </FormControl>
         )}
-        {/* /////////////////// */}
-        {/* //// LEG VALUE //// */}
-        {/* /////////////////// */}
-        {props.segment === 'options' && props.legType.type !== 'leg' && (
-          <TextField
-            size='small'
-            type='number'
-            name='legType.value'
-            value={props.legType.value}
-            onChange={handleChange}
-            sx={{ width: '65px' }}
-          />
+        {/* //////////////////////// */}
+        {/* //// STRIKE DETAILS //// */}
+        {/* //////////////////////// */}
+        {props.segment === 'options' && (
+          <Stack
+            sx={{
+              width: '125px',
+            }}
+          >
+            {props.strike === 'based_on_atm' ? (
+              <FormControl size='small'>
+                <Select
+                  name='strikeDetails'
+                  value={props.strikeDetails}
+                  onChange={handleChange}
+                >
+                  {strikeOptions.map((item, index) => {
+                    return (
+                      <MenuItem key={index} value={item.value}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            ) : (
+              <TextField
+                size='small'
+                type='number'
+                name='strikeDetails'
+                value={props.strikeDetails}
+                onChange={handleChange}
+              />
+            )}
+          </Stack>
         )}
         {/* ///////////////// */}
         {/* //// OPTIONS //// */}
@@ -325,8 +298,22 @@ export default function Leg(props) {
                       value={condition.operator}
                       onChange={handleChange}
                     >
-                      <MenuItem value='banknifty'>Banknifty</MenuItem>
-                      <MenuItem value='nifty'>nifty</MenuItem>
+                      <MenuItem value='greater_than'>
+                        Greater than (&#62;)
+                      </MenuItem>
+                      <MenuItem value='greater_than_equal_to'>
+                        Greater than, equal to (&#61;)
+                      </MenuItem>
+                      <MenuItem value='less_than'>Less than (&#60;)</MenuItem>
+                      <MenuItem value='less_than_equal_to'>
+                        Less than, equal to (&#61;)
+                      </MenuItem>
+                      <MenuItem value='cross_above_from_below'>
+                        cross above from below
+                      </MenuItem>
+                      <MenuItem value='cross_below_from_above'>
+                        cross below from above
+                      </MenuItem>
                     </Select>
                   </FormControl>
                   {/* ///////////// */}
@@ -338,39 +325,53 @@ export default function Leg(props) {
                       value={condition.RHS}
                       onChange={handleChange}
                     >
-                      <MenuItem value='banknifty'>Banknifty</MenuItem>
-                      <MenuItem value='nifty'>nifty</MenuItem>
+                      <MenuItem value='indicator'>Indicator</MenuItem>
+                      <MenuItem value='number'>Number</MenuItem>
+                      <MenuItem value='stock_ltp'>Stock LTP</MenuItem>
                     </Select>
                   </FormControl>
                   {/* /////////////////// */}
                   {/* //// INDICATOR //// */}
                   {/* /////////////////// */}
-                  <Stack direction='row' spacing={1}>
-                    <FormControl size='small'>
-                      <Select
-                        name={`conditions.${index}.indicator_2.name`}
-                        value={condition.indicator_2.name}
+                  {condition.RHS === 'indicator' ? (
+                    <Stack direction='row' spacing={1}>
+                      <FormControl size='small'>
+                        <Select
+                          name={`conditions.${index}.indicator_2.name`}
+                          value={condition.indicator_2.name}
+                          onChange={handleChange}
+                        >
+                          {indicatorOptions.map((item, index) => {
+                            return (
+                              <MenuItem key={index} value={item.value}>
+                                {item.name}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                      <IndicatorParamsModal
+                        label='parameters'
+                        indicator={{
+                          type: 'indicator_2',
+                          name: condition.indicator_2.name,
+                          propertyName: `conditions.${index}.indicator_2.parameters`,
+                          onSave: handleChange,
+                        }}
+                      />
+                    </Stack>
+                  ) : (
+                    condition.RHS === 'number' && (
+                      <TextField
+                        sx={{ width: '100px' }}
+                        size='small'
+                        type='number'
+                        name={`conditions.${index}.RHSValue`}
+                        value={condition.RHSValue || '0'}
                         onChange={handleChange}
-                      >
-                        {indicatorOptions.map((item, index) => {
-                          return (
-                            <MenuItem key={index} value={item.value}>
-                              {item.name}
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-                    <IndicatorParamsModal
-                      label='+'
-                      indicator={{
-                        type: 'indicator_2',
-                        name: condition.indicator_2.name,
-                        propertyName: `conditions.${index}.indicator_2.parameters`,
-                        onSave: handleChange,
-                      }}
-                    />
-                  </Stack>
+                      />
+                    )
+                  )}
                 </Stack>
               );
             })}
@@ -382,7 +383,6 @@ export default function Leg(props) {
           <Stack spacing={1}>
             <Button
               variant='outlined'
-              onClick={handleInstrument}
               sx={{
                 maxWidth: '100px',
                 minWidth: '30px',

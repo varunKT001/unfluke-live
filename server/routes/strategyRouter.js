@@ -13,4 +13,9 @@ router
   // delete strategies
   .delete(auth.checkUserAuthentication, strategyController.deleteStrategies);
 
+router
+  .route('/instruments')
+  // send instrument options
+  .get(auth.checkUserAuthentication, strategyController.sendInstrumentOptions);
+
 module.exports = router;

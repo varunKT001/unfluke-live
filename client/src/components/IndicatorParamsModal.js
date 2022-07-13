@@ -2,7 +2,7 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import { Stack, TextField } from '@mui/material';
+import { FormControl, MenuItem, Select, Stack, TextField } from '@mui/material';
 import { indicatorOptions } from '../utils/constants';
 
 const style = {
@@ -54,6 +54,18 @@ export default function BasicModal({ label, indicator }) {
     // eslint-disable-next-line
   }, [indicator]);
 
+  React.useEffect(() => {
+    setState((prev) => {
+      const items = indicatorParameters.map((item) => item.name);
+      prev['OHLC'] = '';
+      for (let item of items) {
+        prev[item] = '';
+      }
+      return { ...prev };
+    });
+    // eslint-disable-next-line
+  }, [indicatorParameters]);
+
   return (
     <div>
       <Button variant='outlined' onClick={handleOpen}>
@@ -83,6 +95,19 @@ export default function BasicModal({ label, indicator }) {
               </Stack>
             );
           })}
+          <FormControl size='small'>
+            <Typography textTransform='capitalize'>OHLC</Typography>
+            <Select
+              name='OHLC'
+              value={state['OHLC'] || 'open'}
+              onChange={handleChange}
+            >
+              <MenuItem value='open'>Open</MenuItem>
+              <MenuItem value='close'>Close</MenuItem>
+              <MenuItem value='high'>High</MenuItem>
+              <MenuItem value='low'>Low</MenuItem>
+            </Select>
+          </FormControl>
           <Button variant='contained' onClick={handleSave}>
             Save
           </Button>

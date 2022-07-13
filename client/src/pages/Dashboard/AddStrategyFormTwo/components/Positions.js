@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   range,
   deepCopy,
@@ -23,22 +23,23 @@ import {
   Button,
   IconButton,
 } from '@mui/material';
+import Axios from 'axios';
 
 const initialPositions = {
   instrument: 'banknifty',
   segment: 'options',
   options: 'CE',
   buysell: 'buy',
-  strike: 'ATM',
-  strikeDetails: 'ATM',
+  strike: 'based_on_atm',
+  strikeDetails: 'ATM_0',
   quantity: 1,
   tradeType: 'MIS',
   timeFrame: '1',
   conditions: [
     {
       indicator_1: { name: 'sma', parameters: {} },
-      operator: 'banknifty',
-      RHS: 'banknifty',
+      operator: 'greater_than',
+      RHS: 'indicator',
       indicator_2: { name: 'sma', parameters: {} },
     },
   ],
@@ -46,28 +47,40 @@ const initialPositions = {
 
 const initialCondition = {
   indicator_1: { name: 'sma', parameters: {} },
-  operator: 'banknifty',
-  RHS: 'banknifty',
+  operator: 'greater_than',
+  RHS: 'indicator',
   indicator_2: { name: 'sma', parameters: {} },
 };
 
 const strikeOptions = [
   ...range(1, 5, 1)
     .map((item) => {
-      return { name: `ITM ${item}`, value: `ITM_${item}` };
+      return { name: `ITM (-${item} Strike}`, value: `ITM_${item}` };
     })
     .reverse(),
-  { name: 'ATM', value: 'ATM' },
+  { name: 'ATM (+0 Strike)', value: 'ATM_0' },
   ...range(1, 25, 1).map((item) => {
-    return { name: `OTM ${item}`, value: `OTM_${item}` };
+    return { name: `OTM (+${item} Strike)`, value: `OTM_${item}` };
   }),
 ];
 
 export default function Positions() {
   const dispatch = useDispatch();
   const { legs } = useSelector((store) => store.strategyTwo.positions);
+  const [instrumentOptions, setInstrumentOptions] = useState([]);
   const [positions, setPositions] = useState(() => initialPositions);
 
+  async function fetchInstrumentOptions() {
+    try {
+      const resp = await Axios('/strategy/instruments');
+      setInstrumentOptions([...resp.data.data]);
+      setPositions((prev) => {
+        return { ...prev, instrument: resp.data.data[0] };
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
   function handleAndOr(event, index) {
     const name = event.target.dataset.name;
     const propName = `conditions.${index}.logic`;
@@ -113,6 +126,14 @@ export default function Positions() {
       value = 0;
     }
 
+    if (
+      name === 'strikeDetails' &&
+      positions.strike === 'based_on_premium' &&
+      parseFloat(value) < 0
+    ) {
+      value = 0.0;
+    }
+
     setPositions((prev) => {
       set(prev, name.split('.'), value);
       return { ...prev };
@@ -120,16 +141,13 @@ export default function Positions() {
   }
   function handleAddLeg() {
     let leg = deepCopy(positions);
-    leg = {
-      id: v4(),
-      ...leg,
-      legType: {
-        type: leg.segment === 'options' ? 'leg' : 'futures',
-        value: null,
-      },
-    };
+    leg = { id: v4(), ...leg };
     dispatch(addLeg(leg));
   }
+
+  useEffect(() => {
+    fetchInstrumentOptions();
+  }, []);
 
   return (
     <Stack spacing={4}>
@@ -148,8 +166,9 @@ export default function Positions() {
               value={positions.instrument}
               onChange={handleChange}
             >
-              <MenuItem value='banknifty'>Banknifty</MenuItem>
-              <MenuItem value='nifty'>Nifty</MenuItem>
+              {instrumentOptions.map((item, index) => {
+                return <MenuItem value={item}>{item}</MenuItem>;
+              })}
             </Select>
           </FormControl>
         </Stack>
@@ -218,13 +237,8 @@ export default function Positions() {
                 value={positions.strike}
                 onChange={handleChange}
               >
-                {strikeOptions.map((item, index) => {
-                  return (
-                    <MenuItem key={index} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                })}
+                <MenuItem value='based_on_atm'>Based on ATM</MenuItem>
+                <MenuItem value='based_on_premium'>Based on premium</MenuItem>
               </Select>
             </FormControl>
           </Stack>
@@ -233,23 +247,38 @@ export default function Positions() {
         {/* //// STRIKE DETAILS //// */}
         {/* //////////////////////// */}
         {positions.segment === 'options' && (
-          <Stack spacing={1}>
+          <Stack
+            spacing={1}
+            sx={{
+              width: '125px',
+            }}
+          >
             <Typography>Strike Details</Typography>
-            <FormControl size='small'>
-              <Select
+            {positions.strike === 'based_on_atm' ? (
+              <FormControl size='small'>
+                <Select
+                  name='strikeDetails'
+                  value={positions.strikeDetails}
+                  onChange={handleChange}
+                >
+                  {strikeOptions.map((item, index) => {
+                    return (
+                      <MenuItem key={index} value={item.value}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            ) : (
+              <TextField
+                size='small'
+                type='number'
                 name='strikeDetails'
                 value={positions.strikeDetails}
                 onChange={handleChange}
-              >
-                {strikeOptions.map((item, index) => {
-                  return (
-                    <MenuItem key={index} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
+              />
+            )}
           </Stack>
         )}
         {/* ////////////////// */}
@@ -344,8 +373,20 @@ export default function Positions() {
                   value={condition.operator}
                   onChange={handleChange}
                 >
-                  <MenuItem value='banknifty'>Banknifty</MenuItem>
-                  <MenuItem value='nifty'>Nifty</MenuItem>
+                  <MenuItem value='greater_than'>Greater than (&#62;)</MenuItem>
+                  <MenuItem value='greater_than_equal_to'>
+                    Greater than, equal to (&#61;)
+                  </MenuItem>
+                  <MenuItem value='less_than'>Less than (&#60;)</MenuItem>
+                  <MenuItem value='less_than_equal_to'>
+                    Less than, equal to (&#61;)
+                  </MenuItem>
+                  <MenuItem value='cross_above_from_below'>
+                    cross above from below
+                  </MenuItem>
+                  <MenuItem value='cross_below_from_above'>
+                    cross below from above
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Stack>
@@ -360,8 +401,9 @@ export default function Positions() {
                   value={condition.RHS}
                   onChange={handleChange}
                 >
-                  <MenuItem value='banknifty'>Banknifty</MenuItem>
-                  <MenuItem value='nifty'>Nifty</MenuItem>
+                  <MenuItem value='indicator'>Indicator</MenuItem>
+                  <MenuItem value='number'>Number</MenuItem>
+                  <MenuItem value='stock_ltp'>Stock LTP</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
@@ -369,32 +411,55 @@ export default function Positions() {
             {/* //// INDICATOR //// */}
             {/* /////////////////// */}
             <Stack spacing={1}>
-              <Typography>Indicator</Typography>
+              <Typography>
+                {condition.RHS === 'indicator' ? (
+                  'Indicator'
+                ) : condition.RHS === 'number' ? (
+                  'Value'
+                ) : (
+                  <br />
+                )}
+              </Typography>
               <Stack direction='row' spacing={1}>
-                <FormControl size='small'>
-                  <Select
-                    name={`conditions.${index}.indicator_2.name`}
-                    value={condition.indicator_2.name}
-                    onChange={handleChange}
-                  >
-                    {indicatorOptions.map((item, index) => {
-                      return (
-                        <MenuItem key={index} value={item.value}>
-                          {item.name}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                </FormControl>
-                <IndicatorParamsModal
-                  label='parameters'
-                  indicator={{
-                    type: 'indicator_2',
-                    name: condition.indicator_2.name,
-                    propertyName: `conditions.${index}.indicator_2.parameters`,
-                    onSave: handleChange,
-                  }}
-                />
+                {condition.RHS === 'indicator' ? (
+                  <Stack direction='row' spacing={1}>
+                    <FormControl size='small'>
+                      <Select
+                        name={`conditions.${index}.indicator_2.name`}
+                        value={condition.indicator_2.name}
+                        onChange={handleChange}
+                      >
+                        {indicatorOptions.map((item, index) => {
+                          return (
+                            <MenuItem key={index} value={item.value}>
+                              {item.name}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </FormControl>
+                    <IndicatorParamsModal
+                      label='parameters'
+                      indicator={{
+                        type: 'indicator_2',
+                        name: condition.indicator_2.name,
+                        propertyName: `conditions.${index}.indicator_2.parameters`,
+                        onSave: handleChange,
+                      }}
+                    />
+                  </Stack>
+                ) : (
+                  condition.RHS === 'number' && (
+                    <TextField
+                      sx={{ width: '100px' }}
+                      size='small'
+                      type='number'
+                      name={`conditions.${index}.RHSValue`}
+                      value={condition.RHSValue || '0'}
+                      onChange={handleChange}
+                    />
+                  )
+                )}
                 <Stack direction='row' spacing={1} justifyContent='flex-end'>
                   <Button
                     data-name='AND'
