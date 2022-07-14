@@ -1,6 +1,7 @@
 const schedule = require('node-schedule');
 const getAccessToken = require('./getAccessToken');
 const getEncToken = require('./getEncToken');
+const updateFutureStrategies = require('./updateFutureStrategies');
 const Admin = require('../models/adminModel');
 const UserBroker = require('../models/userBroker');
 const kiteTickerInit = require('../subscribe');
@@ -38,6 +39,7 @@ async function init() {
           await updateUserEncToken(users[key].user);
         }
       }
+      await updateFutureStrategies();
       kiteTickerInit();
     } catch (error) {
       console.log(error);
