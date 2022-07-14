@@ -78,6 +78,11 @@ const strategyTwoSlice = createSlice({
     onChange: (state, { payload }) => {
       set(state, payload.name.split('.'), payload.value);
     },
+    changeLegSegment: (state, { payload }) => {
+      state.positions.legs.forEach((leg) => {
+        leg.segment = payload;
+      });
+    },
     updateLeg: (state, action) => {
       let leg = state.positions.legs.find((item) => {
         if (item.id && item.id === action.payload.id) return true;
@@ -141,5 +146,6 @@ export const {
   onChange,
   setEditStrategy,
   clearValues,
+  changeLegSegment,
 } = strategyTwoSlice.actions;
 export default strategyTwoSlice.reducer;

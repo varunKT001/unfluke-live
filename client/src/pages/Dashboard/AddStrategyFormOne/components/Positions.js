@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   addLeg,
   changeLegOptions,
+  changeLegSegment,
 } from '../../../../redux/slices/strategyOneSlice';
 import LegsContainer from './LegsContainer';
 import { v4 } from 'uuid';
@@ -97,6 +98,11 @@ export default function Positions() {
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
+
+    if (name === 'segment') {
+      dispatch(changeLegSegment(value));
+    }
+
     setPositions((prev) => {
       set(prev, name.split('.'), value);
       return { ...prev };

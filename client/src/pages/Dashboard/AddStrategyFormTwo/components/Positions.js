@@ -5,7 +5,10 @@ import {
   setDeepObjProp as set,
 } from '../../../../utils/miscUtils';
 import { useDispatch, useSelector } from 'react-redux';
-import { addLeg } from '../../../../redux/slices/strategyTwoSlice';
+import {
+  addLeg,
+  changeLegSegment,
+} from '../../../../redux/slices/strategyTwoSlice';
 import LegsContainer from './LegsContainer';
 import { IndicatorParamsModal } from '../../../../components';
 import { v4 } from 'uuid';
@@ -121,6 +124,10 @@ export default function Positions() {
   function handleChange(event) {
     const name = event.target.name;
     let value = event.target.value;
+
+    if (name === 'segment') {
+      dispatch(changeLegSegment(value));
+    }
 
     if (name === 'quantity' && parseInt(value) < 0) {
       value = 0;
