@@ -1,7 +1,7 @@
 const postgresClient = require('../config/dbPostgres');
 const SMA = require('technicalindicators').SMA;
 
-async function getSMA(database, table) {
+async function getSMA(database, table, period) {
   try {
     const client = await postgresClient(database);
 
@@ -12,7 +12,7 @@ async function getSMA(database, table) {
     rows = rows.slice(Math.max(rows.length - 5, 1));
 
     const sma = new SMA({
-      period: 5,
+      period,
       values: rows.map((row) => parseFloat(row.close)),
     });
 

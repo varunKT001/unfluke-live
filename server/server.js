@@ -5,8 +5,7 @@ require('dotenv').config();
 // require('./scripts')();
 
 (async function () {
-  // await require('./scripts').updateAdminAccessToken();
-  // require('./subscribe')();
+  // await require('./scripts/updateFutureStrategies')();
   require('./scripts/checkFuturesCondition')();
 })();
 

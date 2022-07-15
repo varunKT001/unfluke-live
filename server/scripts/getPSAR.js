@@ -18,7 +18,7 @@ async function getPSAR(database, table, params) {
 
     const psar = new PSAR(Object.assign({}, input, { reversedInput: true }));
 
-    console.log(psar.result[psar.result.length - 1]);
+    return psar.result[psar.result.length - 1];
   } catch (error) {
     console.log(error);
   }

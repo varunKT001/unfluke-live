@@ -61,6 +61,7 @@ const strategyModel = mongoose.Schema({
               name: { type: String },
               parameters: {},
             },
+            logic: { type: String },
           },
         ],
         target: {

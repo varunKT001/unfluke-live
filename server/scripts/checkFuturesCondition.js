@@ -2,6 +2,8 @@ const Strategy = require('../models/strategyModel');
 const schedule = require('node-schedule');
 const Orders = require('../models/ordersModel');
 const liveFeedEmitter = require('../subscribe/emitter');
+const getSMA = require('./getSMA');
+const getPSAR = require('./getPSAR');
 
 const DAYS = [
   'sunday',
@@ -12,6 +14,39 @@ const DAYS = [
   'friday',
   'saturday',
 ];
+
+function getOperator(name) {
+  let operator;
+
+  if (name === 'greater_than') {
+    operator = '>';
+  } else if (name === 'less_than') {
+    operator = '<';
+  } else if (name === 'greater_than_equal_to') {
+    operator = '>=';
+  } else if (name === 'less_than_equal-to') {
+    operator = '<=';
+  }
+
+  return operator;
+}
+
+async function getIndicatorValue(indicator, database, tablename) {
+  let indicatorValue;
+
+  if (indicator.name === 'sma') {
+    const period = indicator?.parameters?.period || 1;
+    indicatorValue = await getSMA(database, tablename, period);
+  } else if (indicator.name === 'psar') {
+    const params = {
+      step: indicator?.parameters?.step || 0.02,
+      max: indicator?.parameters?.max || 0.2,
+    };
+    indicatorValue = await getPSAR(database, tablename, params);
+  }
+
+  return indicatorValue;
+}
 
 async function checkConditionsForStrategyOne(strategy) {
   const currentDate = new Date();
@@ -93,6 +128,58 @@ async function checkConditionsForStrategyTwo(strategy) {
         const legs = strategy.positions.legs;
         for (let i = 0; i < legs.length; i++) {
           let leg = legs[i];
+
+          const conditions = leg.conditions;
+
+          let conditionsEvaluationString = '';
+
+          for (let j = 0; j < conditions.length; j++) {
+            const condition = conditions[j];
+
+            if (conditionsEvaluationString) {
+              conditionsEvaluationString +=
+                conditions[j - 1]?.logic === 'AND'
+                  ? '&&'
+                  : conditions[j - 1]?.logic === 'OR'
+                  ? '||'
+                  : '';
+            }
+
+            let indicator_1 = await getIndicatorValue(
+              {
+                name: condition.indicator_1.name,
+                parameters: condition.indicator_1.parameters,
+              },
+              leg.database,
+              leg.tablename
+            );
+
+            let indicator_2;
+
+            if (condition.RHS === 'indicator') {
+              indicator_2 = await getIndicatorValue(
+                {
+                  name: condition.indicator_2.name,
+                  parameters: condition.indicator_2.parameters,
+                },
+                leg.database,
+                leg.tablename
+              );
+            } else if (condition.RHS === 'number') {
+              indicator_2 = condition.RHSValue;
+            }
+
+            conditionsEvaluationString += `${indicator_1}`;
+            if (condition.RHS !== 'stock_ltp') {
+              conditionsEvaluationString += `${getOperator(
+                condition.operator
+              )}${indicator_2}`;
+            }
+          }
+          console.log(
+            conditionsEvaluationString,
+            eval(conditionsEvaluationString)
+          );
         }
       }
     }
@@ -137,7 +224,7 @@ function scheduleFuturesForStrategyOne() {
 }
 
 function scheduleFuturesForStrategyTwo() {
-  const job = schedule.scheduleJob('* * * ? * *', async function () {
+  const job = schedule.scheduleJob('* * * * *', async function () {
     const strategies = await Strategy.find({
       $and: [
         {
