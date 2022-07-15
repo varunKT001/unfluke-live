@@ -5,6 +5,7 @@ const updateFutureStrategies = require('./updateFutureStrategies');
 const Admin = require('../models/adminModel');
 const UserBroker = require('../models/userBroker');
 const kiteTickerInit = require('../subscribe');
+const checkFuturesCondition = require('./checkFuturesCondition');
 
 async function updateAdminAccessToken() {
   const admin = await Admin.findOne();
@@ -41,10 +42,11 @@ async function init() {
       }
       await updateFutureStrategies();
       kiteTickerInit();
+      checkFuturesCondition();
     } catch (error) {
       console.log(error);
     }
   });
 }
 
-module.exports = init;
+module.exports = { init, updateAdminAccessToken };

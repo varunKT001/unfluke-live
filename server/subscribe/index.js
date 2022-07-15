@@ -1,4 +1,5 @@
 const KiteTicker = require('kiteconnect').KiteTicker;
+const liveFeedEmitter = require('./emitter');
 const Admin = require('../models/adminModel');
 const SimpleStockNames = require('../models/simpleStockNames');
 const SimpleIndexNames = require('../models/simpleIndexNames');
@@ -30,7 +31,7 @@ async function init() {
   ticker.on('error', onError);
 
   function onTicks(ticks) {
-    console.log('Ticks', ticks);
+    liveFeedEmitter.emit('tick', ticks);
   }
 
   function subscribe() {

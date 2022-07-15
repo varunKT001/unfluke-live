@@ -21,7 +21,7 @@ async function getAccessToken(request_token, user) {
 
 async function init(user) {
   try {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     const loginUrl = `${process.env.ZERODHA_LOGIN_URL}${user.api_key}`;
     await page.goto(loginUrl);

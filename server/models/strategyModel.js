@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const mongoose_local = require('../config/dbLocal');
 
 const strategyModel = mongoose.Schema({
-  user: { type: mongoose.Types.ObjectId, ref: 'User' },
+  user: { type: mongoose.Types.ObjectId, ref: 'UserUnflukeLive' },
   name: { type: String },
   strategyType: { type: String },
   status: { type: String },
