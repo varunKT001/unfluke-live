@@ -34,6 +34,10 @@ const initialState = {
   },
   positions: {
     legs: [],
+    legOptions: {
+      waitAndTrade: false,
+      moveSlToCost: false,
+    },
   },
   MTMTarget: {
     type: 'None',
@@ -77,6 +81,12 @@ const strategyTwoSlice = createSlice({
     },
     onChange: (state, { payload }) => {
       set(state, payload.name.split('.'), payload.value);
+    },
+    changeLegOptions: (state, action) => {
+      state.positions.legOptions = {
+        ...state.positions.legOptions,
+        ...action.payload,
+      };
     },
     changeLegSegment: (state, { payload }) => {
       state.positions.legs.forEach((leg) => {
@@ -147,5 +157,6 @@ export const {
   setEditStrategy,
   clearValues,
   changeLegSegment,
+  changeLegOptions,
 } = strategyTwoSlice.actions;
 export default strategyTwoSlice.reducer;

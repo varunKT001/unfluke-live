@@ -19,6 +19,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { getDeepObjProp as get } from '../../utils/miscUtils';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStrategies, toggleStrategyStatus } from '../../api/strategies';
@@ -42,7 +43,7 @@ function getComparator(order, orderBy) {
 }
 
 function getUniqueLegProps(legs, prop) {
-  const propArray = legs.map((p) => p[prop]);
+  const propArray = legs.map((p) => get(p, prop.split('.')));
   return [...new Set([...propArray])];
 }
 
@@ -238,7 +239,7 @@ export default function EnhancedTable() {
                         >
                           {getUniqueLegProps(
                             row.positions.legs,
-                            'instrument'
+                            'instrument.option'
                           ).map((instrument, index) => {
                             return (
                               <Chip

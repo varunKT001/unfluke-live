@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   addLeg,
   changeLegSegment,
+  changeLegOptions,
 } from '../../../../redux/slices/strategyTwoSlice';
 import LegsContainer from './LegsContainer';
 import { IndicatorParamsModal } from '../../../../components';
@@ -25,6 +26,8 @@ import {
   TextField,
   Button,
   IconButton,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import Axios from 'axios';
 
@@ -46,6 +49,29 @@ const initialPositions = {
       indicator_2: { name: 'sma', parameters: {} },
     },
   ],
+  target: {
+    type: 'None',
+    value: 0,
+  },
+  stopLoss: {
+    type: 'None',
+    value: 0,
+  },
+  trailingStopLoss: {
+    type: 'None',
+    value: {
+      x: 0,
+      y: 0,
+    },
+  },
+  waitTime: {
+    type: 'immediate',
+    value: 0,
+  },
+  legOptions: {
+    waitAndTrade: false,
+    moveSlToCost: false,
+  },
 };
 
 const initialCondition = {
@@ -69,7 +95,9 @@ const strikeOptions = [
 
 export default function Positions() {
   const dispatch = useDispatch();
-  const { legs } = useSelector((store) => store.strategyTwo.positions);
+  const { legs, legOptions } = useSelector(
+    (store) => store.strategyTwo.positions
+  );
   const [instrumentOptions, setInstrumentOptions] = useState([]);
   const [positions, setPositions] = useState(() => initialPositions);
 
@@ -146,11 +174,24 @@ export default function Positions() {
       return { ...prev };
     });
   }
+  function handleCheckBox(event) {
+    const name = event.target.name;
+    let value = event.target.checked;
+    setPositions((prev) => {
+      set(prev, name.split('.'), value);
+      return { ...prev };
+    });
+  }
   function handleAddLeg() {
     let leg = deepCopy(positions);
     leg = { id: v4(), ...leg };
     dispatch(addLeg(leg));
   }
+
+  useEffect(() => {
+    dispatch(changeLegOptions(positions.legOptions));
+    // eslint-disable-next-line
+  }, [positions.legOptions.waitAndTrade, positions.legOptions.moveSlToCost]);
 
   useEffect(() => {
     fetchInstrumentOptions();
@@ -336,6 +377,21 @@ export default function Positions() {
               <MenuItem value='60'>60 min</MenuItem>
             </Select>
           </FormControl>
+        </Stack>
+        {/* ////////////////////// */}
+        {/* //// WAIT & TRADE //// */}
+        {/* ////////////////////// */}
+        <Stack spacing={1} justifyContent='flex-end'>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='legOptions.waitAndTrade'
+                checked={positions.legOptions.waitAndTrade}
+                onChange={handleCheckBox}
+              />
+            }
+            label='Wait & Trade'
+          />
         </Stack>
       </Stack>
       {positions.conditions.map((condition, index) => {

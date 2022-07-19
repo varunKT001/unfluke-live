@@ -136,12 +136,7 @@ export default function Positions() {
   useEffect(() => {
     dispatch(changeLegOptions(positions.legOptions));
     // eslint-disable-next-line
-  }, [
-    positions.legOptions.waitAndTrade,
-    positions.legOptions.moveSlToCost,
-    positions.legOptions.tradeOnlyFirstEntry,
-    positions.legOptions.reEntry,
-  ]);
+  }, [positions.legOptions.waitAndTrade, positions.legOptions.moveSlToCost]);
 
   useEffect(() => {
     fetchInstrumentOptions();

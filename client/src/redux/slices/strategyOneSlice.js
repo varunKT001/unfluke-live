@@ -37,10 +37,8 @@ const initialState = {
   positions: {
     legs: [],
     legOptions: {
-      moveSlToCost: false,
-      reEntry: false,
-      tradeOnlyFirstEntry: false,
       waitAndTrade: false,
+      moveSlToCost: false,
     },
   },
   MTMTarget: {

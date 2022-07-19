@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { indicatorOptions } from '../../../../utils/constants';
 import { IndicatorParamsModal } from '../../../../components';
 import {
@@ -34,6 +34,7 @@ const strikeOptions = [
 
 export default function Leg(props) {
   const dispatch = useDispatch();
+  const { legOptions } = useSelector((store) => store.strategyTwo.positions);
   const [edit, setEdit] = useState(false);
 
   function handleChange(event) {
@@ -255,6 +256,132 @@ export default function Leg(props) {
         </Stack>
       </Stack>
       <Stack direction='row' spacing={2} alignItems='center'>
+        {!edit && (
+          <Stack direction='row' spacing={2}>
+            {/* /////////////////// */}
+            {/* //// WAIT TIME //// */}
+            {/* /////////////////// */}
+            {legOptions.waitAndTrade && (
+              <Stack spacing={1} width='100px'>
+                <FormControl size='small'>
+                  <Select
+                    name='waitTime.type'
+                    value={props.waitTime.type}
+                    onChange={handleChange}
+                    sx={{ color: 'blue', fontWeight: '500' }}
+                  >
+                    <MenuItem value='pts_up'>Pts &uarr;</MenuItem>
+                    <MenuItem value='pts_down'>Pts &darr;</MenuItem>
+                    <MenuItem value='%_up'>% &uarr;</MenuItem>
+                    <MenuItem value='%_down'>% &darr;</MenuItem>
+                    <MenuItem value='immediate'>Immediate</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  size='small'
+                  type='number'
+                  name='waitTime.value'
+                  value={props.waitTime.value}
+                  onChange={handleChange}
+                  sx={{ input: { color: 'blue', fontWeight: '500' } }}
+                  disabled={props.waitTime.type === 'immediate'}
+                />
+              </Stack>
+            )}
+            {/* //////////////// */}
+            {/* //// TARGET //// */}
+            {/* //////////////// */}
+            <Stack spacing={1} width='85px'>
+              <FormControl size='small'>
+                <Select
+                  name='target.type'
+                  value={props.target.type}
+                  onChange={handleChange}
+                  sx={{ color: 'green', fontWeight: '500' }}
+                >
+                  <MenuItem value='TP: %'>TP: %</MenuItem>
+                  <MenuItem value='TP: pt'>TP: pt</MenuItem>
+                  <MenuItem value='None'>None</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                size='small'
+                type='number'
+                name='target.value'
+                value={props.target.value}
+                onChange={handleChange}
+                sx={{ input: { color: 'green', fontWeight: '500' } }}
+                disabled={props.target.type === 'None'}
+              />
+            </Stack>
+            {/* /////////////////// */}
+            {/* //// STOP LOSS //// */}
+            {/* /////////////////// */}
+            <Stack spacing={1} width='85px'>
+              <FormControl size='small'>
+                <Select
+                  name='stopLoss.type'
+                  value={props.stopLoss.type}
+                  onChange={handleChange}
+                  sx={{ color: 'red', fontWeight: '500' }}
+                >
+                  <MenuItem value='SL: %'>SL: %</MenuItem>
+                  <MenuItem value='SL: pt'>SL: pt</MenuItem>
+                  <MenuItem value='None'>None</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                size='small'
+                type='number'
+                name='stopLoss.value'
+                value={props.stopLoss.value}
+                onChange={handleChange}
+                sx={{ input: { color: 'red', fontWeight: '500' } }}
+                disabled={props.stopLoss.type === 'None'}
+              />
+            </Stack>
+            {/* //////////////////////////// */}
+            {/* //// TRAILING STOP LOSS //// */}
+            {/* //////////////////////////// */}
+            <Stack spacing={1} width='125px'>
+              <FormControl
+                size='small'
+                disabled={props.stopLoss.type === 'None'}
+              >
+                <Select
+                  name='trailingStopLoss.type'
+                  value={props.trailingStopLoss.type}
+                  onChange={handleChange}
+                  sx={{ color: 'orange', fontWeight: '500' }}
+                >
+                  <MenuItem value='TS: %'>TS: %</MenuItem>
+                  <MenuItem value='TS: pt'>TS: pt</MenuItem>
+                  <MenuItem value='None'>None</MenuItem>
+                </Select>
+              </FormControl>
+              <Stack direction='row' spacing={1}>
+                <TextField
+                  size='small'
+                  type='number'
+                  name='trailingStopLoss.value.x'
+                  value={props.trailingStopLoss.value.x}
+                  disabled={props.trailingStopLoss.type === 'None'}
+                  onChange={handleChange}
+                  sx={{ input: { color: 'orange', fontWeight: '500' } }}
+                />
+                <TextField
+                  size='small'
+                  type='number'
+                  name='trailingStopLoss.value.y'
+                  value={props.trailingStopLoss.value.y}
+                  disabled={props.trailingStopLoss.type === 'None'}
+                  onChange={handleChange}
+                  sx={{ input: { color: 'orange', fontWeight: '500' } }}
+                />
+              </Stack>
+            </Stack>
+          </Stack>
+        )}
         <Stack spacing={2}>
           {edit === true &&
             props.conditions.map((condition, index) => {

@@ -38,6 +38,13 @@ function setDeepObjProp(obj, path, value) {
   return setDeepObjProp(obj[path[0]], path.slice(1), value);
 }
 
+function getDeepObjProp(obj, path) {
+  if (path.length === 1) {
+    return obj[path];
+  }
+  return getDeepObjProp(obj[path[0]], path.slice(1));
+}
+
 function camalize(str) {
   return str
     .toLowerCase()
@@ -51,5 +58,6 @@ export {
   getUserInput,
   range,
   setDeepObjProp,
+  getDeepObjProp,
   camalize,
 };
