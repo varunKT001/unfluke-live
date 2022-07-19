@@ -35,7 +35,8 @@ const strikeOptions = [
 export default function Leg(props) {
   const dispatch = useDispatch();
   const { legOptions } = useSelector((store) => store.strategyTwo.positions);
-  const [edit, setEdit] = useState(false);
+  const [entry, setEntry] = useState(false);
+  const [exit, setExit] = useState(false);
 
   function handleChange(event) {
     const name = event.target.name;
@@ -256,7 +257,7 @@ export default function Leg(props) {
         </Stack>
       </Stack>
       <Stack direction='row' spacing={2} alignItems='center'>
-        {!edit && (
+        {!entry && !exit && (
           <Stack direction='row' spacing={2}>
             {/* /////////////////// */}
             {/* //// WAIT TIME //// */}
@@ -383,8 +384,8 @@ export default function Leg(props) {
           </Stack>
         )}
         <Stack spacing={2}>
-          {edit === true &&
-            props.conditions.map((condition, index) => {
+          {entry === true &&
+            props.entryConditions.map((condition, index) => {
               return (
                 <Stack key={index} direction='row' spacing={2}>
                   {/* /////////////////// */}
@@ -393,7 +394,7 @@ export default function Leg(props) {
                   <Stack direction='row' spacing={1}>
                     <FormControl size='small'>
                       <Select
-                        name={`conditions.${index}.indicator_1.name`}
+                        name={`entryConditions.${index}.indicator_1.name`}
                         value={condition.indicator_1.name}
                         onChange={handleChange}
                       >
@@ -411,7 +412,7 @@ export default function Leg(props) {
                       indicator={{
                         type: 'indicator_1',
                         name: condition.indicator_1.name,
-                        propertyName: `conditions.${index}.indicator_1.parameters`,
+                        propertyName: `entryConditions.${index}.indicator_1.parameters`,
                         onSave: handleChange,
                       }}
                     />
@@ -421,7 +422,7 @@ export default function Leg(props) {
                   {/* ////////////////// */}
                   <FormControl size='small'>
                     <Select
-                      name={`conditions.${index}.operator`}
+                      name={`entryConditions.${index}.operator`}
                       value={condition.operator}
                       onChange={handleChange}
                     >
@@ -448,7 +449,7 @@ export default function Leg(props) {
                   {/* ///////////// */}
                   <FormControl size='small'>
                     <Select
-                      name={`conditions.${index}.RHS`}
+                      name={`entryConditions.${index}.RHS`}
                       value={condition.RHS}
                       onChange={handleChange}
                     >
@@ -464,7 +465,7 @@ export default function Leg(props) {
                     <Stack direction='row' spacing={1}>
                       <FormControl size='small'>
                         <Select
-                          name={`conditions.${index}.indicator_2.name`}
+                          name={`entryConditions.${index}.indicator_2.name`}
                           value={condition.indicator_2.name}
                           onChange={handleChange}
                         >
@@ -482,7 +483,7 @@ export default function Leg(props) {
                         indicator={{
                           type: 'indicator_2',
                           name: condition.indicator_2.name,
-                          propertyName: `conditions.${index}.indicator_2.parameters`,
+                          propertyName: `entryConditions.${index}.indicator_2.parameters`,
                           onSave: handleChange,
                         }}
                       />
@@ -493,7 +494,126 @@ export default function Leg(props) {
                         sx={{ width: '100px' }}
                         size='small'
                         type='number'
-                        name={`conditions.${index}.RHSValue`}
+                        name={`entryConditions.${index}.RHSValue`}
+                        value={condition.RHSValue || '0'}
+                        onChange={handleChange}
+                      />
+                    )
+                  )}
+                </Stack>
+              );
+            })}
+          {exit === true &&
+            props.exitConditions.map((condition, index) => {
+              return (
+                <Stack key={index} direction='row' spacing={2}>
+                  {/* /////////////////// */}
+                  {/* //// INDICATOR //// */}
+                  {/* /////////////////// */}
+                  <Stack direction='row' spacing={1}>
+                    <FormControl size='small'>
+                      <Select
+                        name={`exitConditions.${index}.indicator_1.name`}
+                        value={condition.indicator_1.name}
+                        onChange={handleChange}
+                      >
+                        {indicatorOptions.map((item, index) => {
+                          return (
+                            <MenuItem key={index} value={item.value}>
+                              {item.name}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </FormControl>
+                    <IndicatorParamsModal
+                      label='+'
+                      indicator={{
+                        type: 'indicator_1',
+                        name: condition.indicator_1.name,
+                        propertyName: `exitConditions.${index}.indicator_1.parameters`,
+                        onSave: handleChange,
+                      }}
+                    />
+                  </Stack>
+                  {/* ////////////////// */}
+                  {/* //// OPERATOR //// */}
+                  {/* ////////////////// */}
+                  <FormControl size='small'>
+                    <Select
+                      name={`exitConditions.${index}.operator`}
+                      value={condition.operator}
+                      onChange={handleChange}
+                    >
+                      <MenuItem value='greater_than'>
+                        Greater than (&#62;)
+                      </MenuItem>
+                      <MenuItem value='greater_than_equal_to'>
+                        Greater than, equal to (&#61;)
+                      </MenuItem>
+                      <MenuItem value='less_than'>Less than (&#60;)</MenuItem>
+                      <MenuItem value='less_than_equal_to'>
+                        Less than, equal to (&#61;)
+                      </MenuItem>
+                      <MenuItem value='cross_above_from_below'>
+                        cross above from below
+                      </MenuItem>
+                      <MenuItem value='cross_below_from_above'>
+                        cross below from above
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                  {/* ///////////// */}
+                  {/* //// RHS //// */}
+                  {/* ///////////// */}
+                  <FormControl size='small'>
+                    <Select
+                      name={`exitConditions.${index}.RHS`}
+                      value={condition.RHS}
+                      onChange={handleChange}
+                    >
+                      <MenuItem value='indicator'>Indicator</MenuItem>
+                      <MenuItem value='number'>Number</MenuItem>
+                      <MenuItem value='stock_ltp'>Stock LTP</MenuItem>
+                    </Select>
+                  </FormControl>
+                  {/* /////////////////// */}
+                  {/* //// INDICATOR //// */}
+                  {/* /////////////////// */}
+                  {condition.RHS === 'indicator' ? (
+                    <Stack direction='row' spacing={1}>
+                      <FormControl size='small'>
+                        <Select
+                          name={`exitConditions.${index}.indicator_2.name`}
+                          value={condition.indicator_2.name}
+                          onChange={handleChange}
+                        >
+                          {indicatorOptions.map((item, index) => {
+                            return (
+                              <MenuItem key={index} value={item.value}>
+                                {item.name}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                      <IndicatorParamsModal
+                        label='parameters'
+                        indicator={{
+                          type: 'indicator_2',
+                          name: condition.indicator_2.name,
+                          propertyName: `exitConditions.${index}.indicator_2.parameters`,
+                          onSave: handleChange,
+                        }}
+                      />
+                    </Stack>
+                  ) : (
+                    condition.RHS === 'number' && (
+                      <TextField
+                        sx={{ width: '100px' }}
+                        size='small'
+                        type='number'
+                        name={`exitConditions.${index}.RHSValue`}
                         value={condition.RHSValue || '0'}
                         onChange={handleChange}
                       />
@@ -521,10 +641,22 @@ export default function Leg(props) {
             {/* //// EDIT //// */}
             {/* ////////////// */}
             <Button
-              variant={edit ? 'contained' : 'outlined'}
-              onClick={() => setEdit(!edit)}
+              variant={entry ? 'contained' : 'outlined'}
+              onClick={() => {
+                setEntry(!entry);
+                setExit(false);
+              }}
             >
-              edit
+              entry
+            </Button>
+            <Button
+              variant={exit ? 'contained' : 'outlined'}
+              onClick={() => {
+                setExit(!exit);
+                setEntry(false);
+              }}
+            >
+              exit
             </Button>
           </Stack>
           {/* //////////////// */}

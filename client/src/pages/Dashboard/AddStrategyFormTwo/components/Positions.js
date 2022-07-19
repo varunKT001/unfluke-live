@@ -41,7 +41,15 @@ const initialPositions = {
   quantity: 1,
   tradeType: 'MIS',
   timeFrame: '1',
-  conditions: [
+  entryConditions: [
+    {
+      indicator_1: { name: 'sma', parameters: {} },
+      operator: 'greater_than',
+      RHS: 'indicator',
+      indicator_2: { name: 'sma', parameters: {} },
+    },
+  ],
+  exitConditions: [
     {
       indicator_1: { name: 'sma', parameters: {} },
       operator: 'greater_than',
@@ -112,10 +120,10 @@ export default function Positions() {
       console.log(error);
     }
   }
-  function handleAndOr(event, index) {
+  function handleAndOrForEntry(event, index) {
     const name = event.target.dataset.name;
-    const propName = `conditions.${index}.logic`;
-    if (positions.conditions[index].logic) {
+    const propName = `entryConditions.${index}.logic`;
+    if (positions.entryConditions[index].logic) {
       setPositions((prev) => {
         set(prev, propName.split('.'), name);
         return { ...prev };
@@ -125,18 +133,48 @@ export default function Positions() {
         set(prev, propName.split('.'), name);
         return {
           ...prev,
-          conditions: [...prev.conditions, deepCopy(initialCondition)],
+          entryConditions: [
+            ...prev.entryConditions,
+            deepCopy(initialCondition),
+          ],
         };
       });
     }
   }
-  function handleDeleteRow(indexToBeDeleted) {
+  function handleAndOrForExit(event, index) {
+    const name = event.target.dataset.name;
+    const propName = `exitConditions.${index}.logic`;
+    if (positions.exitConditions[index].logic) {
+      setPositions((prev) => {
+        set(prev, propName.split('.'), name);
+        return { ...prev };
+      });
+    } else {
+      setPositions((prev) => {
+        set(prev, propName.split('.'), name);
+        return {
+          ...prev,
+          exitConditions: [...prev.exitConditions, deepCopy(initialCondition)],
+        };
+      });
+    }
+  }
+  function handleDeleteRowForEntry(indexToBeDeleted) {
     setPositions((prev) => {
-      const newConditions = prev.conditions.filter(
+      const newConditions = prev.entryConditions.filter(
         (item, index) => index !== indexToBeDeleted
       );
       delete newConditions[newConditions.length - 1].logic;
-      return { ...prev, conditions: [...newConditions] };
+      return { ...prev, entryConditions: [...newConditions] };
+    });
+  }
+  function handleDeleteRowForExit(indexToBeDeleted) {
+    setPositions((prev) => {
+      const newConditions = prev.exitConditions.filter(
+        (item, index) => index !== indexToBeDeleted
+      );
+      delete newConditions[newConditions.length - 1].logic;
+      return { ...prev, exitConditions: [...newConditions] };
     });
   }
   function handleOptions(event, value) {
@@ -394,7 +432,11 @@ export default function Positions() {
           />
         </Stack>
       </Stack>
-      {positions.conditions.map((condition, index) => {
+      {/* /////////////// */}
+      {/* //// ENTRY //// */}
+      {/* /////////////// */}
+      <Typography variant='button'>Entry conditions</Typography>
+      {positions.entryConditions.map((condition, index) => {
         return (
           <Stack key={index} direction='row' spacing={4}>
             {/* /////////////////// */}
@@ -405,7 +447,7 @@ export default function Positions() {
               <Stack direction='row' spacing={1}>
                 <FormControl size='small'>
                   <Select
-                    name={`conditions.${index}.indicator_1.name`}
+                    name={`entryConditions.${index}.indicator_1.name`}
                     value={condition.indicator_1.name}
                     onChange={handleChange}
                   >
@@ -423,7 +465,7 @@ export default function Positions() {
                   indicator={{
                     type: 'indicator_1',
                     name: condition.indicator_1.name,
-                    propertyName: `conditions.${index}.indicator_1.parameters`,
+                    propertyName: `entryConditions.${index}.indicator_1.parameters`,
                     onSave: handleChange,
                   }}
                 />
@@ -436,7 +478,7 @@ export default function Positions() {
               <Typography>Operator</Typography>
               <FormControl size='small'>
                 <Select
-                  name={`conditions.${index}.operator`}
+                  name={`entryConditions.${index}.operator`}
                   value={condition.operator}
                   onChange={handleChange}
                 >
@@ -464,7 +506,7 @@ export default function Positions() {
               <Typography>Type</Typography>
               <FormControl size='small'>
                 <Select
-                  name={`conditions.${index}.RHS`}
+                  name={`entryConditions.${index}.RHS`}
                   value={condition.RHS}
                   onChange={handleChange}
                 >
@@ -492,7 +534,7 @@ export default function Positions() {
                   <Stack direction='row' spacing={1}>
                     <FormControl size='small'>
                       <Select
-                        name={`conditions.${index}.indicator_2.name`}
+                        name={`entryConditions.${index}.indicator_2.name`}
                         value={condition.indicator_2.name}
                         onChange={handleChange}
                       >
@@ -510,7 +552,7 @@ export default function Positions() {
                       indicator={{
                         type: 'indicator_2',
                         name: condition.indicator_2.name,
-                        propertyName: `conditions.${index}.indicator_2.parameters`,
+                        propertyName: `entryConditions.${index}.indicator_2.parameters`,
                         onSave: handleChange,
                       }}
                     />
@@ -521,7 +563,7 @@ export default function Positions() {
                       sx={{ width: '100px' }}
                       size='small'
                       type='number'
-                      name={`conditions.${index}.RHSValue`}
+                      name={`entryConditions.${index}.RHSValue`}
                       value={condition.RHSValue || '0'}
                       onChange={handleChange}
                     />
@@ -533,7 +575,7 @@ export default function Positions() {
                     variant={
                       condition.logic === 'AND' ? 'contained' : 'outlined'
                     }
-                    onClick={(event) => handleAndOr(event, index)}
+                    onClick={(event) => handleAndOrForEntry(event, index)}
                   >
                     AND
                   </Button>
@@ -542,19 +584,192 @@ export default function Positions() {
                     variant={
                       condition.logic === 'OR' ? 'contained' : 'outlined'
                     }
-                    onClick={(event) => handleAndOr(event, index)}
+                    onClick={(event) => handleAndOrForEntry(event, index)}
                   >
                     OR
                   </Button>
                   {index !== 0 && (
                     <IconButton
                       aria-label='delete'
-                      onClick={() => handleDeleteRow(index)}
+                      onClick={() => handleDeleteRowForEntry(index)}
                     >
                       <DeleteIcon />
                     </IconButton>
                   )}
-                  {index === positions.conditions.length - 1 && (
+                </Stack>
+              </Stack>
+            </Stack>
+            {/* ///////////////// */}
+            {/* //// ADD LEG //// */}
+            {/* ///////////////// */}
+          </Stack>
+        );
+      })}
+      {/* ////////////// */}
+      {/* //// EXIT //// */}
+      {/* ////////////// */}
+      <Typography variant='button'>Exit conditions</Typography>
+      {positions.exitConditions.map((condition, index) => {
+        return (
+          <Stack key={index} direction='row' spacing={4}>
+            {/* /////////////////// */}
+            {/* //// INDICATOR //// */}
+            {/* /////////////////// */}
+            <Stack spacing={1}>
+              <Typography>Indicator</Typography>
+              <Stack direction='row' spacing={1}>
+                <FormControl size='small'>
+                  <Select
+                    name={`exitConditions.${index}.indicator_1.name`}
+                    value={condition.indicator_1.name}
+                    onChange={handleChange}
+                  >
+                    {indicatorOptions.map((item, index) => {
+                      return (
+                        <MenuItem key={index} value={item.value}>
+                          {item.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+                <IndicatorParamsModal
+                  label='parameters'
+                  indicator={{
+                    type: 'indicator_1',
+                    name: condition.indicator_1.name,
+                    propertyName: `exitConditions.${index}.indicator_1.parameters`,
+                    onSave: handleChange,
+                  }}
+                />
+              </Stack>
+            </Stack>
+            {/* ////////////////// */}
+            {/* //// OPERATOR //// */}
+            {/* ////////////////// */}
+            <Stack spacing={1}>
+              <Typography>Operator</Typography>
+              <FormControl size='small'>
+                <Select
+                  name={`exitConditions.${index}.operator`}
+                  value={condition.operator}
+                  onChange={handleChange}
+                >
+                  <MenuItem value='greater_than'>Greater than (&#62;)</MenuItem>
+                  <MenuItem value='greater_than_equal_to'>
+                    Greater than, equal to (&#61;)
+                  </MenuItem>
+                  <MenuItem value='less_than'>Less than (&#60;)</MenuItem>
+                  <MenuItem value='less_than_equal_to'>
+                    Less than, equal to (&#61;)
+                  </MenuItem>
+                  <MenuItem value='cross_above_from_below'>
+                    cross above from below
+                  </MenuItem>
+                  <MenuItem value='cross_below_from_above'>
+                    cross below from above
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+            {/* ///////////// */}
+            {/* //// RHS //// */}
+            {/* ///////////// */}
+            <Stack spacing={1}>
+              <Typography>Type</Typography>
+              <FormControl size='small'>
+                <Select
+                  name={`exitConditions.${index}.RHS`}
+                  value={condition.RHS}
+                  onChange={handleChange}
+                >
+                  <MenuItem value='indicator'>Indicator</MenuItem>
+                  <MenuItem value='number'>Number</MenuItem>
+                  <MenuItem value='stock_ltp'>Stock LTP</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+            {/* /////////////////// */}
+            {/* //// INDICATOR //// */}
+            {/* /////////////////// */}
+            <Stack spacing={1}>
+              <Typography>
+                {condition.RHS === 'indicator' ? (
+                  'Indicator'
+                ) : condition.RHS === 'number' ? (
+                  'Value'
+                ) : (
+                  <br />
+                )}
+              </Typography>
+              <Stack direction='row' spacing={1}>
+                {condition.RHS === 'indicator' ? (
+                  <Stack direction='row' spacing={1}>
+                    <FormControl size='small'>
+                      <Select
+                        name={`exitConditions.${index}.indicator_2.name`}
+                        value={condition.indicator_2.name}
+                        onChange={handleChange}
+                      >
+                        {indicatorOptions.map((item, index) => {
+                          return (
+                            <MenuItem key={index} value={item.value}>
+                              {item.name}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </FormControl>
+                    <IndicatorParamsModal
+                      label='parameters'
+                      indicator={{
+                        type: 'indicator_2',
+                        name: condition.indicator_2.name,
+                        propertyName: `exitConditions.${index}.indicator_2.parameters`,
+                        onSave: handleChange,
+                      }}
+                    />
+                  </Stack>
+                ) : (
+                  condition.RHS === 'number' && (
+                    <TextField
+                      sx={{ width: '100px' }}
+                      size='small'
+                      type='number'
+                      name={`exitConditions.${index}.RHSValue`}
+                      value={condition.RHSValue || '0'}
+                      onChange={handleChange}
+                    />
+                  )
+                )}
+                <Stack direction='row' spacing={1} justifyContent='flex-end'>
+                  <Button
+                    data-name='AND'
+                    variant={
+                      condition.logic === 'AND' ? 'contained' : 'outlined'
+                    }
+                    onClick={(event) => handleAndOrForExit(event, index)}
+                  >
+                    AND
+                  </Button>
+                  <Button
+                    data-name='OR'
+                    variant={
+                      condition.logic === 'OR' ? 'contained' : 'outlined'
+                    }
+                    onClick={(event) => handleAndOrForExit(event, index)}
+                  >
+                    OR
+                  </Button>
+                  {index !== 0 && (
+                    <IconButton
+                      aria-label='delete'
+                      onClick={() => handleDeleteRowForExit(index)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                  {index === positions.exitConditions.length - 1 && (
                     <Button variant='contained' onClick={handleAddLeg}>
                       add leg
                     </Button>
