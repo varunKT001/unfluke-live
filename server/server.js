@@ -2,12 +2,7 @@
 require('dotenv').config();
 
 // load cron
-// require('./scripts')();
-
-(async function () {
-  // await require('./scripts/updateFutureStrategies')();
-  require('./scripts/checkFuturesCondition')();
-})();
+require('./scripts')();
 
 // requiring dependencies
 const path = require('path');

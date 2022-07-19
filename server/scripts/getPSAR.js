@@ -1,27 +1,18 @@
-const postgresClient = require('../config/dbPostgres');
 const PSAR = require('technicalindicators').PSAR;
 
-async function getPSAR(database, table, params) {
-  try {
-    const client = await postgresClient(database);
+async function getPSAR(rows, params, amount = 0) {
+  rows = rows.slice(0, rows.length - amount);
 
-    const query = `SELECT * FROM ${table}`;
+  const input = {
+    high: rows.map((row) => parseFloat(row.high)).slice(0, rows.length - 2),
+    low: rows.map((row) => parseFloat(row.low)).slice(0, rows.length - 2),
+    step: params.step,
+    max: params.max,
+  };
 
-    let { rows } = await client.query(query);
+  const psar = new PSAR(Object.assign({}, input, { reversedInput: true }));
 
-    const input = {
-      high: rows.map((row) => parseFloat(row.high)).slice(0, rows.length - 2),
-      low: rows.map((row) => parseFloat(row.low)).slice(0, rows.length - 2),
-      step: params.step,
-      max: params.max,
-    };
-
-    const psar = new PSAR(Object.assign({}, input, { reversedInput: true }));
-
-    return psar.result[psar.result.length - 1];
-  } catch (error) {
-    console.log(error);
-  }
+  return psar.result[psar.result.length - 1];
 }
 
 module.exports = getPSAR;

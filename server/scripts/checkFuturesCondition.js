@@ -4,6 +4,7 @@ const Orders = require('../models/ordersModel');
 const liveFeedEmitter = require('../subscribe/emitter');
 const getSMA = require('./getSMA');
 const getPSAR = require('./getPSAR');
+const getRows = require('./getRows');
 
 const DAYS = [
   'sunday',
@@ -14,6 +15,12 @@ const DAYS = [
   'friday',
   'saturday',
 ];
+
+let TICK;
+
+async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function getOperator(name) {
   let operator;
@@ -31,18 +38,18 @@ function getOperator(name) {
   return operator;
 }
 
-async function getIndicatorValue(indicator, database, tablename) {
+async function getIndicatorValue(indicator, rows, amount = 0) {
   let indicatorValue;
 
   if (indicator.name === 'sma') {
-    const period = indicator?.parameters?.period || 1;
-    indicatorValue = await getSMA(database, tablename, period);
+    const period = indicator?.parameters?.period || 14;
+    indicatorValue = await getSMA(rows, period, amount);
   } else if (indicator.name === 'psar') {
     const params = {
       step: indicator?.parameters?.step || 0.02,
       max: indicator?.parameters?.max || 0.2,
     };
-    indicatorValue = await getPSAR(database, tablename, params);
+    indicatorValue = await getPSAR(rows, params, amount);
   }
 
   return indicatorValue;
@@ -129,6 +136,8 @@ async function checkConditionsForStrategyTwo(strategy) {
         for (let i = 0; i < legs.length; i++) {
           let leg = legs[i];
 
+          const rows = await getRows(leg.database, leg.tablename);
+
           const conditions = leg.conditions;
 
           let conditionsEvaluationString = '';
@@ -150,8 +159,7 @@ async function checkConditionsForStrategyTwo(strategy) {
                 name: condition.indicator_1.name,
                 parameters: condition.indicator_1.parameters,
               },
-              leg.database,
-              leg.tablename
+              rows
             );
 
             let indicator_2;
@@ -162,24 +170,99 @@ async function checkConditionsForStrategyTwo(strategy) {
                   name: condition.indicator_2.name,
                   parameters: condition.indicator_2.parameters,
                 },
-                leg.database,
-                leg.tablename
+                rows
               );
             } else if (condition.RHS === 'number') {
               indicator_2 = condition.RHSValue;
             }
 
-            conditionsEvaluationString += `${indicator_1}`;
             if (condition.RHS !== 'stock_ltp') {
-              conditionsEvaluationString += `${getOperator(
+              if (
+                condition.operator === 'cross_below_from_above' ||
+                condition.operator === 'cross_above_from_below'
+              ) {
+                let tempConditionString = ``;
+
+                const indicator_1_temp = await getIndicatorValue(
+                  {
+                    name: condition.indicator_1.name,
+                    parameters: condition.indicator_1.parameters,
+                  },
+                  rows,
+                  1
+                );
+
+                const tempOperators = [
+                  condition.operator === 'cross_above_from_below' ? '>' : '<',
+                  condition.operator === 'cross_above_from_below' ? '<' : '>',
+                ];
+
+                tempConditionString += `${indicator_1}${tempOperators[0]}${indicator_2}&&${indicator_1_temp}${tempOperators[1]}${indicator_2}`;
+
+                conditionsEvaluationString += tempConditionString;
+
+                continue;
+              }
+
+              conditionsEvaluationString += `${indicator_1}${getOperator(
                 condition.operator
               )}${indicator_2}`;
+            } else {
+              const startTime = new Date(Date.now());
+              const endTime = new Date(startTime.getTime() + 60000);
+
+              const job = schedule.scheduleJob(
+                { start: startTime, end: endTime, rule: '*/1 * * * * *' },
+                function () {
+                  let tempEvaluationString = '';
+                  const feed = TICK.find(
+                    (l) => l.instrument_token === parseInt(leg.instrument_token)
+                  );
+
+                  if (feed) {
+                    tempEvaluationString += `${indicator_1}${getOperator(
+                      condition.operator
+                    )}${feed.last_price}`;
+
+                    if (eval(tempEvaluationString)) {
+                      conditionsEvaluationString += tempEvaluationString;
+                      job.cancel();
+                    }
+                  }
+                }
+              );
+
+              await sleep(60000);
             }
           }
+          if (
+            conditionsEvaluationString.endsWith('&&') ||
+            conditionsEvaluationString.endsWith('||')
+          ) {
+            conditionsEvaluationString = conditionsEvaluationString.slice(
+              0,
+              conditionsEvaluationString.length - 2
+            );
+          }
+
           console.log(
             conditionsEvaluationString,
             eval(conditionsEvaluationString)
           );
+
+          if (eval(conditionsEvaluationString)) {
+            console.log(
+              `Taking entry: (Name: ${strategy.name}, Leg: ${leg._id})`
+            );
+            ``;
+
+            const strategyId = strategy._id;
+            const legId = leg._id;
+            const date = currentDate.toString();
+            const time = currentDate.toLocaleTimeString();
+            const entry = { date, time };
+            const order = await Orders.create({ strategyId, legId, entry });
+          }
         }
       }
     }
@@ -261,6 +344,10 @@ function scheduleFuturesForStrategyTwo() {
 }
 
 function scheduleFutureConditionChecks() {
+  liveFeedEmitter.on('tick', (tick) => {
+    TICK = tick;
+  });
+
   scheduleFuturesForStrategyOne();
   scheduleFuturesForStrategyTwo();
 }

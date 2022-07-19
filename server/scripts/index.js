@@ -49,4 +49,4 @@ async function init() {
   });
 }
 
-module.exports = { init, updateAdminAccessToken };
+module.exports = init;
