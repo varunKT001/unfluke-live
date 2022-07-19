@@ -36,7 +36,10 @@ const strategyModel = mongoose.Schema({
   positions: {
     legs: [
       {
-        instrument: { type: String },
+        instrument: {
+          option: String,
+          multiple: Number,
+        },
         instrument_token: { type: String },
         database: { type: String },
         tablename: { type: String },

@@ -29,7 +29,7 @@ import {
 import Axios from 'axios';
 
 const initialPositions = {
-  instrument: 'banknifty',
+  instrument: { option: 'NIFTY', multiple: 50 },
   segment: 'options',
   options: 'CE',
   buysell: 'buy',
@@ -170,11 +170,15 @@ export default function Positions() {
           <FormControl size='small'>
             <Select
               name='instrument'
-              value={positions.instrument}
+              value={positions.instrument.option}
               onChange={handleChange}
             >
               {instrumentOptions.map((item, index) => {
-                return <MenuItem value={item}>{item}</MenuItem>;
+                return (
+                  <MenuItem key={index} value={item.option}>
+                    {item.option}
+                  </MenuItem>
+                );
               })}
             </Select>
           </FormControl>

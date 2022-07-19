@@ -233,7 +233,7 @@ export default function Leg(props) {
             }}
           />
           <Typography fontSize={18} color='grey.600'>
-            ({props.quantity * (props.instrument === 'banknifty' ? 25 : 50)})
+            ({props.quantity * props.instrument.multiple})
           </Typography>
         </Stack>
       </Stack>
@@ -370,7 +370,7 @@ export default function Leg(props) {
               minWidth: '30px',
             }}
           >
-            {props.instrument}
+            {props.instrument.option}
           </Button>
         </Stack>
         <Stack direction='row' spacing={2}>

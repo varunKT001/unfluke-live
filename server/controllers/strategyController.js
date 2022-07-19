@@ -49,8 +49,21 @@ exports.deleteStrategies = CatchAsyncErrors(async (req, res, next) => {
 exports.sendInstrumentOptions = CatchAsyncErrors(async (req, res, next) => {
   let options = await Options.find();
   const { year } = await UnflukeLiveAdmin.findOne({});
-  options = options.map((option) => option.option.split(year)[0]);
-  const uniqueOptions = [...new Set([...options])];
+
+  options = options.map((option) => {
+    return { option: option.option.split(year)[0], multiple: option.multiple };
+  });
+
+  const stringifiedOptions = options.map((o) => {
+    return JSON.stringify(o);
+  });
+
+  const uniqueStringifiedOptions = [...new Set([...stringifiedOptions])];
+
+  const uniqueOptions = uniqueStringifiedOptions.map((o) => {
+    return JSON.parse(o);
+  });
+
   return res.status(200).json({
     success: true,
     data: uniqueOptions,
